@@ -1,0 +1,76 @@
+﻿@page "/Order/Chat/{orderId:long}"
+
+@using AD.Shared.ViewModels.Message
+
+@inject IMessageRepository _entityRepository
+@inject IOrderRepository _orderRepository
+
+@attribute [Authorize(Roles = "User")]
+
+<ChatMessages entity="entity" entities="entities" orderId="orderId" Create="Create" store="store" />
+<br />
+<a class="btn btn-primary" href="/myOrders">@T["Action_Back_To_List"]</a>
+
+@code
+{ [Parameter] public long orderId { get; set; }
+
+    public Message entity = new Message();
+
+    public List<Message> entities { get; set; }
+
+    public Store store = new Store();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var order = await _orderRepository.Get(orderId);
+
+        if (order == null)
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+        store = order.Product.Store;
+        var user = await _userCRepository.GetCurrent();
+
+        if (order.UserCId != user.Id)
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+        await LoadEntities();
+    }
+
+    private async Task LoadEntities()
+    {
+        entities = await _entityRepository.Get(orderId);
+    }
+
+    private async Task Create()
+    {
+        try
+        {
+            AddMessageVMRequest messageVM = new AddMessageVMRequest()
+            {
+                OrderId = orderId,
+                Text = entity.Text,
+            };
+            Message message = new Message()
+            {
+                OrderId = orderId,
+                Text = entity.Text,
+                MessageType = MessageType.FromCustomer,
+                MessageDateTime = DateTime.UtcNow
+            };
+            entity = new Message();
+            await _entityRepository.Create(messageVM);
+            await LoadEntities();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+}
+
+
+

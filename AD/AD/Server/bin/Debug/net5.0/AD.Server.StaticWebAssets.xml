@@ -1,0 +1,11 @@
+﻿<StaticWebAssets Version="1.0">
+  <ContentRoot BasePath="/" Path="D:\Developer\SABX\Ali Dantel\GitK\AD\AD\Client\bin\Debug\net5.0\wwwroot\" />
+  <ContentRoot BasePath="/" Path="D:\Developer\SABX\Ali Dantel\GitK\AD\AD\Client\obj\Debug\net5.0\scopedcss\bundle\" />
+  <ContentRoot BasePath="/" Path="D:\Developer\SABX\Ali Dantel\GitK\AD\AD\Client\wwwroot\" />
+  <ContentRoot BasePath="/Identity" Path="C:\Users\kinan\.nuget\packages\microsoft.aspnetcore.identity.ui\3.1.0-preview3.19555.2\staticwebassets\V4\" />
+  <ContentRoot BasePath="_content/Blazored.Modal" Path="C:\Users\kinan\.nuget\packages\blazored.modal\6.0.1\build\..\staticwebassets\" />
+  <ContentRoot BasePath="_content/Blazorise" Path="C:\Users\kinan\.nuget\packages\blazorise\0.9.2.5\build\..\staticwebassets\" />
+  <ContentRoot BasePath="_content/Blazorise.Bootstrap" Path="C:\Users\kinan\.nuget\packages\blazorise.bootstrap\0.9.2.5\build\..\staticwebassets\" />
+  <ContentRoot BasePath="_content/Sotsera.Blazor.Toaster" Path="C:\Users\kinan\.nuget\packages\sotsera.blazor.toaster\3.0.0\build\..\staticwebassets\" />
+  <ContentRoot BasePath="_content/Tewr.Blazor.FileReader" Path="C:\Users\kinan\.nuget\packages\tewr.blazor.filereader\3.0.0.20340\build\..\staticwebassets\" />
+</StaticWebAssets>

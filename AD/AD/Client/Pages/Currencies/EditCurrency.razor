@@ -1,0 +1,44 @@
+﻿@page "/currency/edit/{entityId:long}"
+
+@inject ICurrencyRepository _entityRepository
+
+@attribute [Authorize(Roles = "Admin")]
+
+@if (entity != null)
+{
+    <CurrencyForm entity="entity" Action="@T["Action_Edit"]" onValidSubmit="Edit" isBusy="isBusy" />
+}
+@code {
+    [Parameter] public long entityId { get; set; }
+    bool isBusy = false;
+    public Currency entity;
+    protected async override Task OnInitializedAsync()
+    {
+        entity = await _entityRepository.Get(entityId);
+
+        if (entity == null)
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+    }
+
+    private async Task Edit()
+    {
+        try
+        {
+            isBusy = true;
+
+            await _entityRepository.Edit(entity);
+            _navigationManager.NavigateTo("currencies");
+            Toaster.Info(T["Message_Update"]);
+        }
+        catch (Exception ex)
+        {
+            isBusy = false;
+
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    }
+}

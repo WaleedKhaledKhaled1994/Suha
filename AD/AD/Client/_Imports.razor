@@ -1,0 +1,60 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using Newtonsoft.Json
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
+@using Microsoft.JSInterop
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authorization
+@using System.ComponentModel.DataAnnotations
+@using System.ComponentModel.DataAnnotations.Schema
+@using AD.Client
+@using AD.Client.Shared
+@using AD.Shared.Entities
+@using AD.Shared.Entities.Base
+@using AD.Shared.Entities.Base.Enums
+@using AD.Shared.Entities.MTM
+@using AD.Shared.DTOs
+@using AD.Shared.DTOs.Auth
+@using AD.Shared.DTOs.Employee
+@using AD.Shared.DTOs.Category
+@using AD.Shared.DTOs.Product
+@using AD.Shared.DTOs.PaymentMethod
+@using AD.Client.Helpers
+@using AD.Client.Repositories
+@using AD.Client.Repositories.Interfaces
+@using AD.Shared.ViewModels
+@using AD.Shared.ViewModels.Tag
+@using AD.Shared.ViewModels.Store
+@using AD.Shared.ViewModels.City
+@using AD.Shared.ViewModels.Country
+@using AD.Shared.ViewModels.MeasruingUnit
+@using AD.Shared.ViewModels.Category
+@using AD.Shared.ViewModels.Product
+@using AD.Shared.ViewModels.PaymentMethod
+@using AD.Shared.ViewModels.Order
+@using AD.Shared.ViewModels.Notification
+
+@using System.Globalization
+@using Microsoft.Extensions.Localization
+@using AD.Client.Shared.ResourceFiles
+
+@using Tewr.Blazor.FileReader
+@using Blazorise
+@using Blazorise.Components
+@using Sotsera.Blazor.Toaster
+@using Blazored.Modal
+@using Blazored.Modal.Services
+
+@inject IHomeRepository _homeRepository
+@inject NavigationManager _navigationManager
+@inject ILocalizationDB _localizationDB
+@*@inject ICartServices _cartServices*@
+@inject Blazored.LocalStorage.ILocalStorageService _localStorage
+@inject IStringLocalizer<Resource> T
+@inject IRoleRepository _roleRepository
+@inject IUserCRepository _userCRepository
+@inject Sotsera.Blazor.Toaster.IToaster Toaster

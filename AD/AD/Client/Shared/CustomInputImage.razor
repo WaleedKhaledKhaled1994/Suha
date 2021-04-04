@@ -1,0 +1,73 @@
+﻿@using System.IO
+@inject IFileReaderService fileReaderService
+
+@if (display)
+{
+    <span>
+        <input type="file" @ref="@inputElement" @onchange="ImageFileSelected" accept=".jpg,.jpeg,.png" id="@ID"/>
+
+        @*<input type="file" @bind-value="@Value" id="@ID" />*@
+        @if (Value == null)
+        {
+            <span>&nbsp; Please Select an Image &nbsp;</span>
+        }
+        @*else
+        {
+            <span>&nbsp; @Value &nbsp;</span>
+        }*@
+        <button class="btn btn-danger" @onclick="hide">X</button>
+    </span>
+}
+
+
+@code {
+    [Parameter]
+    public int ID { get; set; }
+    [Parameter]
+    public EventCallback<Parameter> SetValue { get; set; }
+
+    ElementReference inputElement;
+    private string imageBase64;
+
+    public bool display = true;
+    private string _value;
+
+    public void hide()
+    {
+        display = false;
+        Value = "Deleted";
+    }
+
+    public string Value
+    {
+        get { return _value; }
+
+        set
+        {
+            if (_value != value)
+            {
+                _value = value;
+                if (SetValue.HasDelegate)
+                {
+                    Parameter parameter = new Parameter() { Id = ID, Value = value };
+                    SetValue.InvokeAsync(parameter);
+                }
+            }
+        }
+    }
+
+    async Task ImageFileSelected()
+    {
+        foreach (var file in await fileReaderService.CreateReference(inputElement).EnumerateFilesAsync())
+        {
+            using (MemoryStream memoryStream = await file.CreateMemoryStreamAsync(4 * 1024))
+            {
+                var imageBytes = new byte[memoryStream.Length];
+                memoryStream.Read(imageBytes, 0, (int)memoryStream.Length);
+                imageBase64 = Convert.ToBase64String(imageBytes);
+                Value = imageBase64;
+                StateHasChanged();
+            }
+        }
+    }
+} 

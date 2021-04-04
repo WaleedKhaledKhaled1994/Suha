@@ -1,0 +1,93 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+	  <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+	  <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+	  <AssemblyName>AD.Client</AssemblyName>
+	  <RootNamespace>AD.Client</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="Pages\Categories\IndexCategotiesByParent.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\css\bootstrap\bootstrap.min.css.map" />
+    <None Include="wwwroot\css\css\bootstrap.min.css.map" />
+    <None Include="wwwroot\css\open-iconic\FONT-LICENSE" />
+    <None Include="wwwroot\css\open-iconic\font\fonts\open-iconic.svg" />
+    <None Include="wwwroot\css\open-iconic\ICON-LICENSE" />
+    <None Include="wwwroot\css\open-iconic\README.md" />
+    <None Include="wwwroot\fonts\fontawesome-webfont3e6e.svg" />
+    <None Include="wwwroot\fonts\fontawesome-webfont3e6e.woff2" />
+    <None Include="wwwroot\fonts\LineIcons5594.svg" />
+    <None Include="wwwroot\js\js\bootstrap.min.js" />
+    <None Include="wwwroot\js\js\bootstrap.min.js.map" />
+    <None Include="wwwroot\js\js\default\active.js" />
+    <None Include="wwwroot\js\js\default\dark-mode-switch.js" />
+    <None Include="wwwroot\js\js\default\jquery.passwordstrength.js" />
+    <None Include="wwwroot\js\js\jarallax-video.min.js" />
+    <None Include="wwwroot\js\js\jarallax-video.min.js.map" />
+    <None Include="wwwroot\js\js\jarallax.min.js" />
+    <None Include="wwwroot\js\js\jarallax.min.js.map" />
+    <None Include="wwwroot\js\js\jquery.animatedheadline.min.js" />
+    <None Include="wwwroot\js\js\jquery.counterup.min.js" />
+    <None Include="wwwroot\js\js\jquery.easing.min.js" />
+    <None Include="wwwroot\js\js\jquery.min.js" />
+    <None Include="wwwroot\js\js\owl.carousel.min.js" />
+    <None Include="wwwroot\js\js\popper.min.js" />
+    <None Include="wwwroot\js\js\popper.min.js.map" />
+    <None Include="wwwroot\js\js\waypoints.min.js" />
+    <None Include="wwwroot\js\js\wow.min.js" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="10.1.1" />
+		<PackageReference Include="Blazored.LocalStorage" Version="3.0.0" />
+		<PackageReference Include="Blazored.Modal" Version="6.0.1" />
+		<PackageReference Include="Blazorise.Bootstrap" Version="0.9.2.5" />
+		<PackageReference Include="Blazorise.Components" Version="0.9.2.5" />
+		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.2.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="5.0.2" />
+		<PackageReference Include="Sotsera.Blazor.Toaster" Version="3.0.0" />
+		<PackageReference Include="Tewr.Blazor.FileReader" Version="3.0.0.20340" />
+		<PackageReference Include="Microsoft.Extensions.Localization" Version="5.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.2" PrivateAssets="all" />
+		<PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\AD.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Shared\ResourceFiles\Resource.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resource.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Shared\ResourceFiles\Resource.ar.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Shared\ResourceFiles\Resource.fr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Shared\ResourceFiles\Resource.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Shared\ResourceFiles\Resource.ru.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,75 @@
+﻿@page "/login"
+
+@inject IAccountRepository accountRepository
+@inject ILoginService loginService
+
+@using AD.Client.Auth
+
+<div class="page-content-wrapper">
+    <div class="container">
+        <div class="profile-wrapper-area py-3">
+            <div class="card user-info-card">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="user-info">
+                        <h3>@T["Action_Login"]</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="card user-data-card">
+                <div class="card-body">
+                    <EditForm Model="loginDTO" OnValidSubmit="LoginUser">
+                        <DataAnnotationsValidator />
+                        <div class="form-group">
+                            <label>@T["Property_UserName"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@loginDTO.UserName" />
+                                <ValidationMessage For="@(() => loginDTO.UserName)" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>@T["Property_Password"]:</label>
+                            <div>
+                                <InputPassword class="form-control" @bind-Value="@loginDTO.Password" />
+                                <ValidationMessage For="@(() => loginDTO.Password)" />
+                            </div>
+                        </div>
+
+                        <button type="submit" disabled=@isBusy class="btn btn-primary">@T["Action_Login"]</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code { private LoginDTO loginDTO = new LoginDTO();
+    bool isBusy = false;
+
+    private async Task LoginUser()
+    {
+        try
+        {
+            isBusy = true;
+            var userToken = await accountRepository.Login(loginDTO);
+            await loginService.Login(userToken);
+
+            Toaster.Success(@T["Message_Login_success"]);
+            _navigationManager.NavigateTo("");
+        }
+        catch (Exception ex)
+        {
+            isBusy = false;
+
+            //if (ex.Message == "Invalid Login Attempt")
+            //    Toaster.Error(@T["Message_Login_error"]);
+            //else if (ex.Message == "Sorry You are Freezed")
+            //    Toaster.Error(@T["Message_Login_Freezed"]);
+            //else
+            //{
+            //Toaster.Error(@T["Message_Error"]);
+            Toaster.Error(@T["Message_Login_error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+            //}
+        }
+    } }

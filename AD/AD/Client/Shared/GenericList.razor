@@ -1,0 +1,38 @@
+﻿@typeparam TItem
+
+@if (List == null)
+{
+    <img src="/images/Loading.gif" alt="Loading..." style="display: block; margin-left: auto; margin-right: auto; width: 50%;" />
+}
+else if (List.Count == 0)
+{
+    @if (EmptyElement != null)
+    {
+        @EmptyElement
+    }
+    else
+    {
+        //Default Content
+        <text>@T["Message_Empty"]</text>
+    }
+}
+else
+{
+    @if (ElementTemplate != null)
+    {
+        @foreach (var element in List)
+        {
+            @ElementTemplate(element)
+        }
+    }
+    else
+    {
+        @WholeListTemplate
+    }
+}
+@code {
+    [Parameter] public RenderFragment EmptyElement { get; set; }
+    [Parameter] public RenderFragment<TItem> ElementTemplate { get; set; }
+    [Parameter] public RenderFragment WholeListTemplate { get; set; }
+    [Parameter] public List<TItem> List { get; set; }
+}

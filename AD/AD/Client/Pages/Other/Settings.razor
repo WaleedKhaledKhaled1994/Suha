@@ -1,0 +1,120 @@
+﻿@page "/settings"
+@inject IJSRuntime js
+
+<Header />
+
+<div class="page-content-wrapper">
+    <div class="container">
+        <!-- Settings Wrapper-->
+        <div class="settings-wrapper py-3">
+            <div class="card settings-card">
+                <div class="card-body">
+                    <!-- Single Settings-->
+                    <div class="single-settings d-flex align-items-center justify-content-between">
+                        <div class="title"><i class="lni-check-mark-circle"></i><span>Availability</span></div>
+                        <div class="data-content">
+                            <div class="toggle-button-cover">
+                                <div class="button r">
+                                    <input class="checkbox" type="checkbox" checked>
+                                    <div class="knobs"></div>
+                                    <div class="layer"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card settings-card">
+                <div class="card-body">
+                    <!-- Single Settings-->
+                    <div class="single-settings d-flex align-items-center justify-content-between">
+                        <div class="title"><i class="lni-alarm"></i><span>Notifications</span></div>
+                        <div class="data-content">
+                            <div class="toggle-button-cover">
+                                <div class="button r">
+                                    <input class="checkbox" type="checkbox" checked>
+                                    <div class="knobs"></div>
+                                    <div class="layer"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card settings-card">
+                <div class="card-body">
+                    <!-- Single Settings-->
+                    <div class="single-settings d-flex align-items-center justify-content-between">
+                        <div class="title"><i class="lni-night"></i><span>Night Mode</span></div>
+                        <div class="data-content">
+                            <div class="toggle-button-cover">
+                                <div class="button r">
+                                    @if (mode == "dark")
+                                    {
+                                        <input class="checkbox" id="darkSwitch" type="checkbox" checked="checked" @onchange="darkMode">
+                                    }
+                                    else
+                                    {
+                                        <input class="checkbox" id="darkSwitch" type="checkbox" @onchange="darkMode">
+                                    }
+                                    <div class="knobs"></div>
+                                    <div class="layer"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card settings-card">
+                <div class="card-body">
+                    <!-- Single Settings-->
+                    <div class="single-settings d-flex align-items-center justify-content-between">
+                        <div class="title"><i class="lni-world"></i><span>Language</span></div>
+                        <div class="data-content"><a href="language">English<i class="lni-chevron-right"></i></a></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card settings-card">
+                <div class="card-body">
+                    <!-- Single Settings-->
+                    <div class="single-settings d-flex align-items-center justify-content-between">
+                        <div class="title"><i class="lni-question-circle"></i><span>Support</span></div>
+                        <div class="data-content"><a class="pl-4" href="support.html"><i class="lni-chevron-right"></i></a></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card settings-card">
+                <div class="card-body">
+                    <!-- Single Settings-->
+                    <div class="single-settings d-flex align-items-center justify-content-between">
+                        <div class="title"><i class="lni-protection"></i><span>Privacy</span></div>
+                        <div class="data-content"><a class="pl-4" href="privacy"><i class="lni-chevron-right"></i></a></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card settings-card">
+                <div class="card-body">
+                    <!-- Single Settings-->
+                    <div class="single-settings d-flex align-items-center justify-content-between">
+                        <div class="title"><i class="lni-lock"></i><span>Password<span>Updated 2 month ago</span></span></div>
+                        <div class="data-content"><a href="changePassword">Change<i class="lni-chevron-right"></i></a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<Footer />
+
+@code {
+    private string mode;
+    protected async Task darkMode()
+    {
+        await js.InvokeVoidAsync("darkMode");
+    }
+    protected async override Task OnInitializedAsync()
+    {
+        mode = await js.InvokeAsync<string>("GetDarkMode");
+    }
+}

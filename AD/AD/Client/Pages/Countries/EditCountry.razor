@@ -1,0 +1,56 @@
+﻿@page "/country/edit/{entityId:long}"
+
+@inject ICountryRepository _entityRepository
+
+@attribute [Authorize(Roles = "Admin")]
+
+@if (entity != null)
+{
+    <CountryForm entity="entity" Action="Edit" onValidSubmit="Edit" isBusy="isBusy" />
+}
+@code {
+    [Parameter] public long entityId { get; set; }
+    public Country entity;
+    bool isBusy = false;
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        entity = await _entityRepository.Get(entityId);
+
+        if (entity == null)
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+    }
+
+    private async Task Edit()
+    {
+        try
+        {
+            isBusy = true;
+            EditCountryVMRequest countryVM = new()
+            {
+                Id = entity.Id,
+                Name_ar = entity.Name_ar,
+                Name_en = entity.Name_en,
+                Name_fr = entity.Name_fr,
+                Name_tr = entity.Name_tr,
+                Name_ru = entity.Name_ru,
+                Image = entity.Image,
+                Status = entity.Status
+            };
+            await _entityRepository.Edit(countryVM);
+            _navigationManager.NavigateTo("countries");
+            Toaster.Info(T["Message_Update"]);
+        }
+        catch (Exception ex)
+        {
+            isBusy = false;
+
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    }
+}

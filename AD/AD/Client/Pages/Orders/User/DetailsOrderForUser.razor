@@ -1,0 +1,93 @@
+﻿@page "/order/details/{entityId:long}"
+
+@inject IOrderRepository _entityRepository
+
+@if (entity != null)
+{
+    <div class="page-content-wrapper">
+        <div class="container">
+            <div class="profile-wrapper-area py-3">
+                <div class="card user-info-card">
+                    <div class="card-body p-4 d-flex align-items-center">
+                        <div class="user-info">
+                            <h3>@T["Details"] @T["Class_Order"]</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card user-data-card">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Product_Name"]:</label>
+                            <div>
+                                <span>@entity.Product.Name</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Store_Name"]:</label>
+                            <div>
+                                <span>@entity.Product.Store.Name</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Description"]:</label>
+                            <div>
+                                <span>@entity.Product.Description</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_MinValue"]:</label>
+                            <div>
+                                <span>@entity.Product.MinValue</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Total"]:</label>
+                            <div>
+                                <span>@entity.Total</span><span>@entity.StorePaymentMethod.PaymentMethod.Name</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Note"]:</label>
+                            <div>
+                                <span>@entity.Product.Note</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Status"]:</label>
+                            <div>
+                                <span>@entity.Status</span>
+                            </div>
+                        </div>
+                        <a class="btn btn-primary" href="myOrders">@T["Action_Back_To_List"]</a>
+                        <a class="btn btn-success" href="order/edit/@entityId">@T["Action_Edit"]</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+    public Order entity;
+    [Parameter] public long entityId { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        var user = await _userCRepository.GetCurrent();
+
+        if (user == null)
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+
+        entity = await _entityRepository.GetOrderDetailsForUser(entityId);
+
+        if (entity == null || entity.UserCId != user.Id)
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+    }
+}

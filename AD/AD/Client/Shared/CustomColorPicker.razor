@@ -1,0 +1,50 @@
+﻿@if (display)
+{
+    <span>
+        <input type="color" @bind-value="@Value" id="@ID" />
+        @if (Value == null)
+        {
+            <span>&nbsp; Please Select a Color &nbsp;</span>
+        }
+        else
+        {
+            <span>&nbsp; @Value &nbsp;</span>
+        }
+        <button class="btn btn-danger" @onclick="hide">X</button>
+    </span>
+}
+
+
+@code {
+    public bool display = true;
+    private string _value;
+
+    public void hide()
+    {
+        display = false;
+        Value = "Deleted";
+    }
+
+    public string Value
+    {
+        get { return _value; }
+
+        set
+        {
+            if (_value != value)
+            {
+                _value = value;
+                if (SetValue.HasDelegate)
+                {
+                    Parameter parameter = new Parameter() { Id = ID, Value = value };
+                    SetValue.InvokeAsync(parameter);
+                }
+            }
+        }
+    }
+
+    [Parameter]
+    public int ID { get; set; }
+    [Parameter]
+    public EventCallback<Parameter> SetValue { get; set; }
+} 

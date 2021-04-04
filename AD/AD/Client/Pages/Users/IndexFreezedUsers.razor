@@ -1,0 +1,140 @@
+﻿@page "/freezedUsers"
+
+@inject IUserCRepository _entityRepository
+
+@attribute [Authorize(Roles = "Admin")]
+
+<h3 style="text-align: center;">@T["NavMenu_FreezedStores"]</h3>
+
+<div class="form-inline">
+    <div class="form-group">
+        <a class="btn btn-success" href="Users">@T["NavMenu_Users"]</a>
+        &nbsp;&nbsp;&nbsp;
+            <div class="form-group mb-2"><input @onchange="Search" class="form-control" placeholder="@T["Action_Search"]" /></div>
+            <span class="text-muted ml-5">
+                @T["Action_Search_Shwoing"] @entities.Count @T["Action_Search_OutOf"] @totalAmount
+            </span>
+    </div>
+</div>
+
+    <GenericList List="entities">
+        <WholeListTemplate>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>@T["Property_Code"]</th>
+                        <th>@T["Property_UserName"]</th>
+                        <th>@T["Property_FirstName"]</th>
+                        <th>@T["Property_LastName"]</th>
+                        <th>@T["Property_PhoneNumber"]</th>
+                        <th>@T["Property_Email"]</th>
+                        <th>@T["Property_BirthYear"]</th>
+                        <th>@T["Property_City"]</th>
+                        <th>@T["Property_Country"]</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in entities)
+                    {
+                        <tr>
+                            <td>
+                                @item.Code
+                            </td>
+                            <td>
+                                @item.UserName
+                            </td>
+                            <td>
+                                @item.FirstName
+                            </td>
+                            <td>
+                                @item.LastName
+                            </td>
+                            <td>
+                                @item.PhoneNumber
+                            </td>
+                            <td>
+                                @item.Email
+                            </td>
+                            <td>
+                                @item.BirthYear
+                            </td>
+                            <td>
+                                @_localizationDB.GetName(item.City)
+                            </td>
+                            <td>
+                                @_localizationDB.GetName(item.City.Country)
+                            </td>
+                            <td>
+                                <button class="btn btn-success" @onclick="@(() => ShowModal(@item.Id))">@T["Action_UnFreeze"]</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </WholeListTemplate>
+    </GenericList>
+    <AD.Client.Shared.Pagination CurrentPage="@paginationDTO.Page" SelectedPage="SelectedPage" TotalAmountPages="totalAmountOfPages" />
+
+    @code {
+        [CascadingParameter] public IModalService Modal { get; set; }
+
+        List<UserC> entities = new List<UserC>();
+
+        PaginationSearchDTO paginationDTO = new PaginationSearchDTO() { RecordsPerPage = 10 };
+        private int totalAmountOfPages;
+        private long totalAmount;
+
+        protected override async Task OnInitializedAsync()
+        {
+            await LoadEntities();
+        }
+
+        private async Task Search(ChangeEventArgs args)
+        {
+            paginationDTO.SearchText = args.Value.ToString();
+            await LoadEntities();
+        }
+
+        private async Task SelectedPage(int page)
+        {
+            paginationDTO.Page = page;
+            await LoadEntities();
+        }
+
+        private async Task LoadEntities()
+        {
+            var paginatedResponse = await _entityRepository.GetFreezedUsers(paginationDTO);
+            entities = paginatedResponse.Response;
+            totalAmountOfPages = paginatedResponse.TotalAmountPages;
+            totalAmount = paginatedResponse.TotalAmount;
+        }
+
+        private async Task ShowModal(long id)
+        {
+
+            var modal = Modal.Show<Confirm>(@T["Modal_Confirm_UnFreeze_User"]);
+
+            var result = await modal.Result;
+
+            if (!result.Cancelled && (result.Data is bool accepted) && accepted)
+            {
+                try
+                {
+                    FreezeVMRequest userCVM = new()
+                    {
+                        Id = id,
+                        Status = Status.Online,
+                    };
+                    await _entityRepository.Freeze_UnFreeze(userCVM);
+                    await LoadEntities();
+                    Toaster.Success(T["Message_User_UnFreeze"]);
+                }
+                catch (Exception ex)
+                {
+                    Toaster.Error(T["Message_Error"]);
+                    await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+                }
+            }
+        }
+    }

@@ -1,0 +1,100 @@
+﻿@page "/orderStore/details/{entityId:long}"
+
+@inject IOrderRepository _entityRepository
+
+@if (entity != null)
+{
+    <div class="page-content-wrapper">
+        <div class="container">
+            <div class="profile-wrapper-area py-3">
+                <div class="card user-info-card">
+                    <div class="card-body p-4 d-flex align-items-center">
+                        <div class="user-info">
+                            <h3>@T["Details"] @T["Class_Order"]</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card user-data-card">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_UserName"]:</label>
+                            <div>
+                                <span>@entity.UserC.UserName</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_User_City_Country"]:</label>
+                            <div>
+                                <span>@entity.UserC.City.Country.Name_en</span>
+                                <span>/</span>
+                                <span>@entity.UserC.City.Name_en</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Product_Name"]:</label>
+                            <div>
+                                <span>@entity.Product.Name</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Description"]:</label>
+                            <div>
+                                <span>@entity.Product.Description</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_MinValue"]:</label>
+                            <div>
+                                <span>@entity.Product.MinValue</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Total"]:</label>
+                            <div>
+                                <span>@entity.Total</span><span>@entity.StorePaymentMethod.PaymentMethod.Name</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Note"]:</label>
+                            <div>
+                                <span>@entity.Product.Note</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Status"]:</label>
+                            <div>
+                                <span>@entity.Status</span>
+                            </div>
+                        </div>
+                        <a class="btn btn-primary" href="storeOrders/@entity.Product.StoreId">@T["Action_Back_To_List"]</a>
+                        <a class="btn btn-success" href="order/edit/@entityId">@T["Action_Edit"]</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+    public Order entity;
+    [Parameter] public long entityId { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        entity = await _entityRepository.GetOrderDetailsForStore(entityId);
+
+        if (entity == null)
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+        var userRoles = await _roleRepository.GetRolesForStore(entity.Product.StoreId);
+
+        if (!userRoles.Contains(EmployeeRole.ManageOrders))
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+    }
+}

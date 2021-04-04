@@ -1,0 +1,78 @@
+﻿@page "/product/edit/{entityId:long}"
+
+@inject IProductRepository _entityRepository
+
+@attribute [Authorize(Roles = "User")]
+
+@if (entity != null)
+{
+    <ProductFormEdit entity="entity" Action="@T["Action_Edit"]" onValidSubmit="Edit" isBusy="isBusy" />
+}
+@code {
+    [Parameter] public long entityId { get; set; }
+    bool isBusy = false;
+    public ProductDetailsDTO entity;
+    protected async override Task OnInitializedAsync()
+    {
+        entity = await _entityRepository.Get(entityId);
+        if (entity == null)
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+
+        var userRoles = await _roleRepository.GetRolesForStore(entity.Product.StoreId);
+
+        if (!userRoles.Contains(EmployeeRole.ManageProducts))
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+    }
+
+    private async Task Edit()
+    {
+        try
+        {
+            isBusy = true;
+            EditProductVMRequest productVM = new()
+            {
+                Colors = entity.Colors,
+                Images = entity.Images,
+
+                OldColors = entity.OldColors,
+                OldImages = entity.OldImages,
+
+                Id = entity.Product.Id,
+                CodeStore = entity.Product.CodeStore,
+                Brand = entity.Product.Brand,
+                Name = entity.Product.Name,
+                Description = entity.Product.Description,
+                MeasruingUnitId = entity.Product.MeasruingUnitId,
+                MinValue = entity.Product.MinValue,
+                Price = entity.Product.Price,
+                Quantity1 = entity.Product.Quantity1,
+                Price1 = entity.Product.Price1,
+                Quantity2 = entity.Product.Quantity2,
+                Price2 = entity.Product.Price2,
+                Quantity3 = entity.Product.Quantity3,
+                Price3 = entity.Product.Price3,
+                CategoryId = entity.Product.CategoryId,
+                Note = entity.Product.Note,
+                StoreId = entity.Product.StoreId,
+                Status = entity.Product.Status,
+                CurrencyId = entity.Product.CurrencyId
+            };
+            await _entityRepository.Edit(productVM);
+            _navigationManager.NavigateTo($"storeProducts/{entity.Product.StoreId}");
+            Toaster.Info(T["Message_Update"]);
+        }
+        catch (Exception ex)
+        {
+            isBusy = false;
+
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    }
+}

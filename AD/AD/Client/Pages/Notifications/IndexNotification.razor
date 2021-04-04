@@ -1,0 +1,124 @@
+﻿@page "/notifications"
+
+@inject INotificationRepository _entityRepository
+
+@attribute [Authorize(Roles = "User")]
+
+<h3 style="text-align: center;">@T["NavMenu_Notifications"]</h3>
+
+<div class="form-inline">
+    <div class="form-group">
+        <div class="form-group mb-2"><input @onchange="Search" class="form-control" placeholder="@T["Action_Search"]" /></div>
+        <span class="text-muted ml-5">
+            @T["Action_Search_Shwoing"] @entities.Count @T["Action_Search_OutOf"] @totalAmount
+        </span>
+    </div>
+</div>
+
+<GenericList List="entities">
+    <WholeListTemplate>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>@T["Property_DateTime"]</th>
+                    <th>@T["Property_Title"]</th>
+                    <th>@T["Property_Body"]</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in entities)
+                {
+                    <tr>
+                        <td>
+                            @if (!item.IsRead)
+                            {
+                                <span class='badge my-2 badge-pill badge-danger'>
+                                    New
+                                </span>
+                            }
+                        </td>
+                        <td>
+                            @item.NotificationTime
+                        </td>
+                        <td>
+                            @item.Title
+                        </td>
+                        <td>
+                            @item.Body
+                        </td>
+                        <td>
+                            <a class="btn btn-primary" href="@item.Link">@T["Action_Details"]</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </WholeListTemplate>
+</GenericList>
+<AD.Client.Shared.Pagination CurrentPage="@paginationDTO.Page" SelectedPage="SelectedPage" TotalAmountPages="totalAmountOfPages" />
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    List<Notification> entities = new List<Notification>();
+
+    PaginationSearchDTO paginationDTO = new PaginationSearchDTO() { RecordsPerPage = 10 };
+    private int totalAmountOfPages;
+    private long totalAmount;
+
+    protected InputImage inputImage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEntities();
+    }
+
+    private async Task Search(ChangeEventArgs args)
+    {
+        paginationDTO.SearchText = args.Value.ToString();
+        await LoadEntities();
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        paginationDTO.Page = page;
+        await LoadEntities();
+    }
+
+    private async Task LoadEntities()
+    {
+        var paginatedResponse = await _entityRepository.Get(paginationDTO);
+        entities = paginatedResponse.Response;
+        totalAmountOfPages = paginatedResponse.TotalAmountPages;
+        totalAmount = paginatedResponse.TotalAmount;
+
+        List<long> listNotificationToUpdateRead = entities.Where(x => x.IsRead == false).Select(x => x.Id).ToList();
+        if (listNotificationToUpdateRead.Any())
+        {
+            await _entityRepository.Edit(listNotificationToUpdateRead);
+        }
+    }
+
+    private async Task ShowModal(long id)
+    {
+        var modal = Modal.Show<ConfirmDelete>(@T["Modal_Confirm_Delete"]);
+        var result = await modal.Result;
+
+        if (!result.Cancelled && (result.Data is bool accepted) && accepted)
+        {
+            try
+            {
+                await _entityRepository.Delete(id);
+                await LoadEntities();
+                Toaster.Error(T["Message_Delete"]);
+            }
+            catch (Exception ex)
+            {
+                Toaster.Error(T["Message_Error"]);
+                await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+            }
+        }
+    }
+}

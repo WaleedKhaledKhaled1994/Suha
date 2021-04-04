@@ -1,0 +1,232 @@
+﻿@inject IPaymentMethodRepository _paymentMethodRepository
+
+@attribute [Authorize(Roles = "User")]
+
+<div class="simple-form">
+    <EditForm Model="_form" OnValidSubmit="SubmitForm">
+        <DataAnnotationsValidator />
+        <div class="form-group">
+            <label class="font-weight-bolder">@T["Property_Category"]: </label>
+            <span>@_localizationDB.GetName(@entity.ProductDetailsDTO.Product.Category)</span>
+        </div>
+        <div class="form-group">
+            <label class="font-weight-bolder">@T["Property_Name"]: </label>
+            <span>@entity.ProductDetailsDTO.Product.Name</span>
+        </div>
+        <div class="form-group">
+            <label class="font-weight-bolder">@T["Property_Description"]: </label>
+            <span>@entity.ProductDetailsDTO.Product.Description</span>
+        </div>
+        <div class="form-group">
+            <label class="font-weight-bolder">@T["Property_Price"]: </label>
+            <span>@entity.ProductDetailsDTO.Product.Price @entity.ProductDetailsDTO.Product.Currency?.Code</span>
+            <span>(@entity.PriceUser @entity.UserCurrency?.Code)</span>
+        </div>
+        @if (@entity.ProductDetailsDTO.Product.Quantity1 != null)
+        {
+            <div class="form-group">
+                <label class="font-weight-bolder">@T["Property_Quantity1"]: @T["Property_Price1"]:</label>
+                <div>
+                    <span style="font-weight:400">(@entity.ProductDetailsDTO.Product.Quantity1 @_localizationDB.GetName(@entity.ProductDetailsDTO.Product.MeasruingUnit)):</span>
+                    <span> @entity.ProductDetailsDTO.Product.Price1 @entity.ProductDetailsDTO.Product.Currency?.Code</span>
+                    <span>(@entity.PriceUser1 @entity.UserCurrency?.Code)</span>
+                </div>
+            </div>}
+        @if (@entity.ProductDetailsDTO.Product.Quantity2 != null)
+        {
+            <div class="form-group">
+                <label class="font-weight-bolder">@T["Property_Quantity2"]: @T["Property_Price2"]:</label>
+                <div>
+                    <span style="font-weight:400">(@entity.ProductDetailsDTO.Product.Quantity2 @_localizationDB.GetName(@entity.ProductDetailsDTO.Product.MeasruingUnit)):</span>
+                    <span> @entity.ProductDetailsDTO.Product.Price2 @entity.ProductDetailsDTO.Product.Currency?.Code</span>
+                    <span>(@entity.PriceUser2 @entity.UserCurrency?.Code)</span>
+                </div>
+            </div>}
+        @if (@entity.ProductDetailsDTO.Product.Quantity3 != null)
+        {
+            <div class="form-group">
+                <label class="font-weight-bolder">@T["Property_Quantity3"]: @T["Property_Price3"]:</label>
+                <div>
+                    <span style="font-weight:400">(@entity.ProductDetailsDTO.Product.Quantity3 @_localizationDB.GetName(@entity.ProductDetailsDTO.Product.MeasruingUnit)):</span>
+                    <span> @entity.ProductDetailsDTO.Product.Price3 @entity.ProductDetailsDTO.Product.Currency?.Code</span>
+                    <span>(@entity.PriceUser3 @entity.UserCurrency?.Code)</span>
+                </div>
+            </div>}
+        <div class="form-group">
+            <label class="font-weight-bolder">@T["Property_Note"]: </label>
+            <span>@entity.ProductDetailsDTO.Product.Note</span>
+        </div>
+        <div class="form-group">
+            @foreach (var item in entity.ProductDetailsDTO.Images)
+            {
+                <img class="img-fluid img-thumbnail" alt="Product Image" src="@item" style="height:200px; width:200px;" />}
+        </div>
+        <hr />
+        <div class="form-group">
+            <label class="font-weight-bolder">@T["Property_Colors"]:</label>
+            @foreach (var item in entity.ProductDetailsDTO.Colors)
+            {
+                <input type="button" class="btn" style="background-color:@item" @onclick="(() => ColorSelected(item))" /> @*<span style="width:100px;height:50px;background-color:@item" @onclick="ColorSelected(@item.ToString()))">@item</span>*@}
+        </div>
+        <div class="form-group">
+            <label class="font-weight-bolder">@T["Property_Quantity"]: </label>
+            <input type="number" class="form-control" @onchange="onQuantityChangeHandler" />
+            <ValidationMessage For="@(() => _form.Quantity)" />
+        </div>
+        <div class="form-group">
+            <label class="font-weight-bolder">@T["Property_CustomerNote"]: </label>
+            <InputText class="form-control" @bind-Value="@_form.CustomerNote" />
+            <ValidationMessage For="@(() => _form.CustomerNote)" />
+        </div>
+        <div class="form-group">
+            <label class="font-weight-bolder">@T["Property_PaymentMethod"]: </label>
+            <SelectList TItem="StorePaymentMethods"
+                        TValue="long"
+                        Data="@StorePaymentMethods"
+                        TextField="@((item)=>item.PaymentMethod?.Name)"
+                        ValueField="@((item)=>item.Id)"
+                        SelectedValueChanged="@onChangeStorePaymentMethod" />
+            <ValidationMessage For="@(() => _form.CustomerNote)" />
+        </div>
+        @if (validQuantity)
+        {
+            <button type="submit" class="btn btn-primary" disabled=@isBusy>Submit</button>
+        }
+        else
+        {
+            <button type="submit" class="btn btn-primary" disabled>Submit</button>
+        }
+        <button @onclick="Cancel" class="btn btn-secondary">Cancel</button>
+        @if (_form.Color != null)
+        {
+            <div style="background-color:@_form.Color">
+                <label class="font-weight-bolder">@T["Property_Colors"]: @_form.Color</label>
+            </div>
+        }
+        @if (_form.StorePaymentMethod != null)
+        {
+            <div>
+                <label class="font-weight-bolder">@T["Property_PaymentMethod"]: @_form.StorePaymentMethod.PaymentMethod?.Name</label>
+                <span>@_form.StorePaymentMethod?.Details</span>
+            </div>
+        }
+
+        @if (validQuantity)
+        {
+            <div>
+                <label class="font-weight-bolder">@T["Property_Total"]: @_form.Total</label>
+            </div>
+        }
+
+        @if (minValueMessage)
+        {
+            <div>
+                <label class="font-weight-bolder" style="color:red;">@T["Message_MinValue_err"] @entity.ProductDetailsDTO.Product.MinValue</label>
+            </div>
+        }
+    </EditForm>
+</div>
+
+@code
+{ [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    [Parameter] public ProductDetailsUserDTO entity { get; set; }
+
+    ProductCartDTO _form = new ProductCartDTO();
+    private bool isBusy = false;
+
+    private List<StorePaymentMethods> StorePaymentMethods = new List<StorePaymentMethods>();
+
+    private bool minValueMessage = false;
+    private bool validQuantity = false;
+
+    protected async override Task OnInitializedAsync()
+    {
+        StorePaymentMethods = await _paymentMethodRepository.GetPaymentMethodsByStoreId(entity.ProductDetailsDTO.Product.StoreId);
+        if (StorePaymentMethods.Any())
+            _form.StorePaymentMethod = StorePaymentMethods[0];
+    }
+
+    private void ColorSelected(string color)
+    {
+        _form.Color = color;
+    }
+
+    private void onQuantityChangeHandler(ChangeEventArgs args)
+    {
+        _form.Quantity = Convert.ToInt32(args.Value);
+
+        if (_form.Quantity < entity.ProductDetailsDTO.Product.MinValue)
+        {
+            minValueMessage = true;
+            validQuantity = false; 
+        }
+
+        else
+        {
+            minValueMessage = false;
+            validQuantity = true;
+
+            if (_form.Quantity >= entity.ProductDetailsDTO.Product.Quantity3)
+                _form.Total = (int)_form.Quantity * entity.ProductDetailsDTO.Product.Price3;
+            else if (_form.Quantity >= entity.ProductDetailsDTO.Product.Quantity2)
+                _form.Total = (int)_form.Quantity * entity.ProductDetailsDTO.Product.Price2;
+            else if (_form.Quantity >= entity.ProductDetailsDTO.Product.Quantity1)
+                _form.Total = (int)_form.Quantity * entity.ProductDetailsDTO.Product.Price1;
+            else
+                _form.Total = (int)_form.Quantity * entity.ProductDetailsDTO.Product.Price;
+        }
+    }
+
+    private async Task onChangeStorePaymentMethod(long Id)
+    {
+        _form.StorePaymentMethod = (await _paymentMethodRepository.GetPaymentMethodsByStoreId(entity.ProductDetailsDTO.Product.StoreId))
+                                                                  .Where(x => x.Id == Id).SingleOrDefault();
+        StateHasChanged();
+    }
+
+    private async Task SubmitForm()
+    {
+        if (validQuantity)
+        {
+            int max = 0;
+            try
+            {
+                isBusy = true;
+
+                max = await _localStorage.GetItemAsync<int>("max");
+
+                if (max == 0)
+                {
+                    await _localStorage.SetItemAsync("max", 1);
+                    max = 1;
+                }
+            }
+            catch (Exception)
+            {
+                isBusy = false;
+
+                Console.WriteLine("error reading 'max'");
+            }
+
+            _form.Product = entity.ProductDetailsDTO.Product;
+
+            try
+            {
+                await _localStorage.SetItemAsync($"{max}", _form);
+                await _localStorage.SetItemAsync("max", max + 1);
+            }
+            catch (Exception)
+            {
+                isBusy = false;
+
+                Console.WriteLine("error setting to LocalStorage");
+            }
+
+            await BlazoredModal.CloseAsync(ModalResult.Ok(_form));
+            isBusy = false;
+        }
+    }
+
+    async Task Cancel() => await BlazoredModal.CancelAsync();
+}

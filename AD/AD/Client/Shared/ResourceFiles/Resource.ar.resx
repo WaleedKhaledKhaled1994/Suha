@@ -1,0 +1,774 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Action_Accept" xml:space="preserve">
+    <value>موافق</value>
+  </data>
+  <data name="Action_Add" xml:space="preserve">
+    <value>إضافة</value>
+  </data>
+  <data name="Action_AddToCart" xml:space="preserve">
+    <value>إضافة إلى السلة</value>
+  </data>
+  <data name="Action_Back_To_List" xml:space="preserve">
+    <value>العودة إلى الصفحة الرئيسية</value>
+  </data>
+  <data name="Action_Chat" xml:space="preserve">
+    <value>محادثة</value>
+  </data>
+  <data name="Action_Clear" xml:space="preserve">
+    <value>مسح</value>
+  </data>
+  <data name="Action_ConfirmOrder" xml:space="preserve">
+    <value>تأكيد الطلب</value>
+  </data>
+  <data name="Action_ConfirmOrders" xml:space="preserve">
+    <value>تأكيد الطلبات</value>
+  </data>
+  <data name="Action_Create" xml:space="preserve">
+    <value>إضافة</value>
+  </data>
+  <data name="Action_Delete" xml:space="preserve">
+    <value>حذف</value>
+  </data>
+  <data name="Action_Details" xml:space="preserve">
+    <value>التفاصيل</value>
+  </data>
+  <data name="Action_Edit" xml:space="preserve">
+    <value>تعديل</value>
+  </data>
+  <data name="Action_Filter" xml:space="preserve">
+    <value>بحث</value>
+  </data>
+  <data name="Action_Follow" xml:space="preserve">
+    <value>متابعة</value>
+  </data>
+  <data name="Action_Freeze" xml:space="preserve">
+    <value>تجميد</value>
+  </data>
+  <data name="Action_Login" xml:space="preserve">
+    <value>تسجيل الدخول</value>
+  </data>
+  <data name="Action_Next" xml:space="preserve">
+    <value>التالي</value>
+  </data>
+  <data name="Action_Previous" xml:space="preserve">
+    <value>السابق</value>
+  </data>
+  <data name="Action_Receive" xml:space="preserve">
+    <value>تأكيد الاستلام</value>
+  </data>
+  <data name="Action_Register" xml:space="preserve">
+    <value>إنشاء حساب</value>
+  </data>
+  <data name="Action_Reject" xml:space="preserve">
+    <value>رفض</value>
+  </data>
+  <data name="Action_Save" xml:space="preserve">
+    <value>حفظ</value>
+  </data>
+  <data name="Action_Search" xml:space="preserve">
+    <value>ابحث هنا...</value>
+  </data>
+  <data name="Action_Search_OutOf" xml:space="preserve">
+    <value>من</value>
+  </data>
+  <data name="Action_Search_Shwoing" xml:space="preserve">
+    <value>عرض</value>
+  </data>
+  <data name="Action_Select" xml:space="preserve">
+    <value>--الرجاء الاختيار من القائمة--</value>
+  </data>
+  <data name="Action_Send" xml:space="preserve">
+    <value>إرسال</value>
+  </data>
+  <data name="Action_UnFollow" xml:space="preserve">
+    <value>إلغاء المتابعة</value>
+  </data>
+  <data name="Action_UnFreeze" xml:space="preserve">
+    <value>إلغاء تجميد</value>
+  </data>
+  <data name="Class_Category" xml:space="preserve">
+    <value>الصنف</value>
+  </data>
+  <data name="Class_Chat" xml:space="preserve">
+    <value>محادثة</value>
+  </data>
+  <data name="Class_City" xml:space="preserve">
+    <value>مدينة</value>
+  </data>
+  <data name="Class_Country" xml:space="preserve">
+    <value>البلد</value>
+  </data>
+  <data name="Class_Currency" xml:space="preserve">
+    <value>عملة</value>
+  </data>
+  <data name="Class_Employee" xml:space="preserve">
+    <value>موظف</value>
+  </data>
+  <data name="Class_MeasruingUnit" xml:space="preserve">
+    <value>وحدة قياس</value>
+  </data>
+  <data name="Class_PaymentMethod" xml:space="preserve">
+    <value>وسيلة دفع</value>
+  </data>
+  <data name="Class_Product" xml:space="preserve">
+    <value>منتج</value>
+  </data>
+  <data name="Class_Store" xml:space="preserve">
+    <value>متجر</value>
+  </data>
+  <data name="Class_Tag" xml:space="preserve">
+    <value>وسم</value>
+  </data>
+  <data name="Event_Order_Closed" xml:space="preserve">
+    <value>طلب تم تسليمه</value>
+  </data>
+  <data name="Event_Order_Edited" xml:space="preserve">
+    <value>طلب تم تعديل حالته</value>
+  </data>
+  <data name="Event_Order_Rejected" xml:space="preserve">
+    <value>عذراً، تم رفض طلبية</value>
+  </data>
+  <data name="Filter_From" xml:space="preserve">
+    <value>من</value>
+  </data>
+  <data name="Filter_To" xml:space="preserve">
+    <value>إلى</value>
+  </data>
+  <data name="Index_Welcome" xml:space="preserve">
+    <value>مرحبا بك في تطبيقك الجديد</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>جاري التحميل...</value>
+  </data>
+  <data name="Message_Add" xml:space="preserve">
+    <value>تم إضافة سجل جديد</value>
+  </data>
+  <data name="Message_Add_Product_To_Cart" xml:space="preserve">
+    <value>إضافة منتج إلى السلة</value>
+  </data>
+  <data name="Message_Category_Freeze" xml:space="preserve">
+    <value>تم تجميد الصنف بنجاح</value>
+  </data>
+  <data name="Message_Category_UnFreeze" xml:space="preserve">
+    <value>تم إلغاء تجميد الصنف بنجاح</value>
+  </data>
+  <data name="Message_City_error" xml:space="preserve">
+    <value>الرجاء اختيار الدولة والمدينة</value>
+  </data>
+  <data name="Message_Delete" xml:space="preserve">
+    <value>تم حذف السجل</value>
+  </data>
+  <data name="Message_Empty" xml:space="preserve">
+    <value>لا يوجد سجلات</value>
+  </data>
+  <data name="Message_Error" xml:space="preserve">
+    <value>عذراً قد حدث خطأ ما</value>
+  </data>
+  <data name="Message_Follow" xml:space="preserve">
+    <value>تمت الإضافة بنجاح لقائمتك المفضلة</value>
+  </data>
+  <data name="Message_Freeze_Successful" xml:space="preserve">
+    <value>تم التجميد بنجاح</value>
+  </data>
+  <data name="Message_Login_error" xml:space="preserve">
+    <value>يوجد خطأ ما، يرجى التحقق من اسم المستخدم وكلمة السر</value>
+  </data>
+  <data name="Message_Login_Freezed" xml:space="preserve">
+    <value>عذراً، هذا الحساب قد تم تجميده</value>
+  </data>
+  <data name="Message_Login_success" xml:space="preserve">
+    <value>مرحبا بك</value>
+  </data>
+  <data name="Message_MinValue_err" xml:space="preserve">
+    <value>أقل كمية شراء مسموحة هي:</value>
+  </data>
+  <data name="Message_OrderUpdated" xml:space="preserve">
+    <value>تم تعديل حالة الطلب بنجاح</value>
+  </data>
+  <data name="Message_Quantity_err" xml:space="preserve">
+    <value>لا يمكنك اختيار كمية بدون سعر</value>
+  </data>
+  <data name="Message_Rate" xml:space="preserve">
+    <value>شكراً لتقييمك الطلب!</value>
+  </data>
+  <data name="Message_Register_err" xml:space="preserve">
+    <value>يوجد خطأ ما، يرجى اختيار رقم غير مستخدم سابقاً</value>
+  </data>
+  <data name="Message_Register_success" xml:space="preserve">
+    <value>تم إنشاء الحساب بنجاح</value>
+  </data>
+  <data name="Message_RoleUpdated" xml:space="preserve">
+    <value>تم تعديل الصلاحيات بنجاح</value>
+  </data>
+  <data name="Message_Select_err" xml:space="preserve">
+    <value>الرجاء الاختيار من القائمة</value>
+  </data>
+  <data name="Message_Store_Accept" xml:space="preserve">
+    <value>تم قبول المتجر بنجاح</value>
+  </data>
+  <data name="Message_Store_Freeze" xml:space="preserve">
+    <value>تم تجميد المتجر بنجاح</value>
+  </data>
+  <data name="Message_Store_Reject" xml:space="preserve">
+    <value>تم رفض المتجر بنجاح</value>
+  </data>
+  <data name="Message_Store_UnFreeze" xml:space="preserve">
+    <value>تم إلغاء تجميد المتجر بنجاح</value>
+  </data>
+  <data name="Message_UnFollow" xml:space="preserve">
+    <value>تمت الإزالة من قائمتك المفضلة</value>
+  </data>
+  <data name="Message_Update" xml:space="preserve">
+    <value>تم تعديل السجل</value>
+  </data>
+  <data name="Message_UserName_error" xml:space="preserve">
+    <value>اسم المستخدم موجود مسبقاً</value>
+  </data>
+  <data name="Message_User_Freeze" xml:space="preserve">
+    <value>تم تجميد المستخدم بنجاح</value>
+  </data>
+  <data name="Message_User_UnFreeze" xml:space="preserve">
+    <value>تم إلغاء تجميد المستخدم بنجاح</value>
+  </data>
+  <data name="Modal_Confirm_Accept" xml:space="preserve">
+    <value>هل تريد بالتأكيد قبول هذا المتجر؟</value>
+  </data>
+  <data name="Modal_Confirm_Delete" xml:space="preserve">
+    <value>هل تريد بالتأكيد حذف هذا السجل؟</value>
+  </data>
+  <data name="Modal_Confirm_Freeze_Category" xml:space="preserve">
+    <value>هل أنت متأكد من تجميد هذا الصنف؟</value>
+  </data>
+  <data name="Modal_Confirm_Freeze_Product" xml:space="preserve">
+    <value>هل أنت متأكد من تجميد هذا المنتج؟</value>
+  </data>
+  <data name="Modal_Confirm_Freeze_Store" xml:space="preserve">
+    <value>هل أنت متأكد من تجميد هذا المتجر؟</value>
+  </data>
+  <data name="Modal_Confirm_Freeze_User" xml:space="preserve">
+    <value>هل أنت متأكد من تجميد هذا الحساب؟</value>
+  </data>
+  <data name="Modal_Confirm_No" xml:space="preserve">
+    <value>إلغاء</value>
+  </data>
+  <data name="Modal_Confirm_Reject" xml:space="preserve">
+    <value>هل تريد بالتأكيد رفض هذا المتجر؟</value>
+  </data>
+  <data name="Modal_Confirm_UnFreeze_Category" xml:space="preserve">
+    <value>هل أنت متأكد من  إلغاء تجميد هذا الصنف؟</value>
+  </data>
+  <data name="Modal_Confirm_UnFreeze_Store" xml:space="preserve">
+    <value>هل أنت متأكد من  إلغاء تجميد هذا المتجر؟</value>
+  </data>
+  <data name="Modal_Confirm_UnFreeze_User" xml:space="preserve">
+    <value>هل أنت متأكد من  إلغاء تجميد هذا المستخدم؟</value>
+  </data>
+  <data name="Modal_Confirm_Yes" xml:space="preserve">
+    <value>نعم</value>
+  </data>
+  <data name="Navbar_Culture" xml:space="preserve">
+    <value>اللغة</value>
+  </data>
+  <data name="Navbar_Login" xml:space="preserve">
+    <value>تسجيل الدخول</value>
+  </data>
+  <data name="Navbar_Logout" xml:space="preserve">
+    <value>تسجيل الخروج</value>
+  </data>
+  <data name="Navbar_Register" xml:space="preserve">
+    <value>انشاء حساب</value>
+  </data>
+  <data name="NavMenu_Audits" xml:space="preserve">
+    <value>التعديلات</value>
+  </data>
+  <data name="NavMenu_BackgroundServices" xml:space="preserve">
+    <value>الخدمات الخلفية</value>
+  </data>
+  <data name="NavMenu_Cart" xml:space="preserve">
+    <value>سلة المشتريات</value>
+  </data>
+  <data name="NavMenu_Categories" xml:space="preserve">
+    <value>الأصناف</value>
+  </data>
+  <data name="NavMenu_CategoryProducts" xml:space="preserve">
+    <value>منتجات الصنف</value>
+  </data>
+  <data name="NavMenu_Cities" xml:space="preserve">
+    <value>المدن</value>
+  </data>
+  <data name="NavMenu_Counter" xml:space="preserve">
+    <value>العداد</value>
+  </data>
+  <data name="NavMenu_Countries" xml:space="preserve">
+    <value>البلدان</value>
+  </data>
+  <data name="NavMenu_Currencies" xml:space="preserve">
+    <value>العملات</value>
+  </data>
+  <data name="NavMenu_Employees" xml:space="preserve">
+    <value>الموظفون</value>
+  </data>
+  <data name="NavMenu_Errors_Log" xml:space="preserve">
+    <value>سجل الأخطاء</value>
+  </data>
+  <data name="NavMenu_FavouriteCategories" xml:space="preserve">
+    <value>الأصناف المفضلة</value>
+  </data>
+  <data name="NavMenu_FavouriteStores" xml:space="preserve">
+    <value>المتاجر المفضلة</value>
+  </data>
+  <data name="NavMenu_FreezedCategories" xml:space="preserve">
+    <value>الأصناف المجمدة</value>
+  </data>
+  <data name="NavMenu_FreezedProducts" xml:space="preserve">
+    <value>المنتجات المجمدة</value>
+  </data>
+  <data name="NavMenu_FreezedStores" xml:space="preserve">
+    <value>المتاجر المجمدة</value>
+  </data>
+  <data name="NavMenu_FreezedUsers" xml:space="preserve">
+    <value>المستخدمين المجمدين</value>
+  </data>
+  <data name="NavMenu_HangFire" xml:space="preserve">
+    <value>HangFire</value>
+  </data>
+  <data name="NavMenu_Home" xml:space="preserve">
+    <value>الصفحة الرئيسية</value>
+  </data>
+  <data name="NavMenu_MeasruingUnits" xml:space="preserve">
+    <value>وحدات القياس</value>
+  </data>
+  <data name="NavMenu_MyOrders" xml:space="preserve">
+    <value>طلباتي</value>
+  </data>
+  <data name="NavMenu_MyStores" xml:space="preserve">
+    <value>المتاجر الخاصة بي</value>
+  </data>
+  <data name="NavMenu_Notifications" xml:space="preserve">
+    <value>الإشعارات</value>
+  </data>
+  <data name="NavMenu_Orders" xml:space="preserve">
+    <value>الطلبات</value>
+  </data>
+  <data name="NavMenu_PaymentMethods" xml:space="preserve">
+    <value>وسائل الدفع</value>
+  </data>
+  <data name="NavMenu_Products" xml:space="preserve">
+    <value>المنتجات</value>
+  </data>
+  <data name="NavMenu_RequestAdminStores" xml:space="preserve">
+    <value>طلبات إدارة متجر</value>
+  </data>
+  <data name="NavMenu_StoreProducts" xml:space="preserve">
+    <value>منتجات المتجر</value>
+  </data>
+  <data name="NavMenu_Stores" xml:space="preserve">
+    <value>المتاجر</value>
+  </data>
+  <data name="NavMenu_Swagger" xml:space="preserve">
+    <value>Swagger</value>
+  </data>
+  <data name="NavMenu_Tags" xml:space="preserve">
+    <value>الوسوم</value>
+  </data>
+  <data name="NavMenu_Users" xml:space="preserve">
+    <value>المستخدمين</value>
+  </data>
+  <data name="No_Result_Found" xml:space="preserve">
+    <value>لا يوجد نتائج</value>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>طلبية</value>
+  </data>
+  <data name="Permission_Admin" xml:space="preserve">
+    <value>مدير متجر</value>
+  </data>
+  <data name="Permission_ManageComments" xml:space="preserve">
+    <value>إدارة التعليقات</value>
+  </data>
+  <data name="Permission_ManageOrders" xml:space="preserve">
+    <value>إدارة الطلبات</value>
+  </data>
+  <data name="Permission_ManageProducts" xml:space="preserve">
+    <value>إدارة المنتجات</value>
+  </data>
+  <data name="PlaceHolder_Payment_Details" xml:space="preserve">
+    <value>بيان الدفع</value>
+  </data>
+  <data name="Property_ActionType" xml:space="preserve">
+    <value>نوع التعديل</value>
+  </data>
+  <data name="Property_Address" xml:space="preserve">
+    <value>العنوان</value>
+  </data>
+  <data name="Property_AffectedColumns" xml:space="preserve">
+    <value>أماكن التعديل</value>
+  </data>
+  <data name="Property_Affected_Columns" xml:space="preserve">
+    <value>الأعمدة المتأثرة</value>
+  </data>
+  <data name="Property_BirthYear" xml:space="preserve">
+    <value>سنة الميلاد</value>
+  </data>
+  <data name="Property_Body" xml:space="preserve">
+    <value>المحتوى</value>
+  </data>
+  <data name="Property_Brand" xml:space="preserve">
+    <value>الماركة</value>
+  </data>
+  <data name="Property_Category" xml:space="preserve">
+    <value>الصنف</value>
+  </data>
+  <data name="Property_CategoryL1" xml:space="preserve">
+    <value>الصنف مستوى1</value>
+  </data>
+  <data name="Property_CategoryL2" xml:space="preserve">
+    <value>الصنف مستوى2</value>
+  </data>
+  <data name="Property_CategoryL3" xml:space="preserve">
+    <value>الصنف مستوى3</value>
+  </data>
+  <data name="Property_CategoryL4" xml:space="preserve">
+    <value>الصنف مستوى4</value>
+  </data>
+  <data name="Property_CategoryLevel" xml:space="preserve">
+    <value>درجة الصنف</value>
+  </data>
+  <data name="Property_Cities" xml:space="preserve">
+    <value>المدن</value>
+  </data>
+  <data name="Property_City" xml:space="preserve">
+    <value>المدينة</value>
+  </data>
+  <data name="Property_Code" xml:space="preserve">
+    <value>الرمز</value>
+  </data>
+  <data name="Property_CodeStore" xml:space="preserve">
+    <value>الكود</value>
+  </data>
+  <data name="Property_Colors" xml:space="preserve">
+    <value>اللون</value>
+  </data>
+  <data name="Property_Column" xml:space="preserve">
+    <value>الحقل</value>
+  </data>
+  <data name="Property_ConfirmPassword" xml:space="preserve">
+    <value>تأكيد كلمة السر</value>
+  </data>
+  <data name="Property_Countries" xml:space="preserve">
+    <value>البلدان</value>
+  </data>
+  <data name="Property_Country" xml:space="preserve">
+    <value>الدولة</value>
+  </data>
+  <data name="Property_Currency" xml:space="preserve">
+    <value>العملة</value>
+  </data>
+  <data name="Property_CustomerNote" xml:space="preserve">
+    <value>ملاحظات المستخدم</value>
+  </data>
+  <data name="Property_DateTime" xml:space="preserve">
+    <value>التوقيت</value>
+  </data>
+  <data name="Property_DefaultCurrency" xml:space="preserve">
+    <value>العملة الإفتراضية</value>
+  </data>
+  <data name="Property_Description" xml:space="preserve">
+    <value>الوصف</value>
+  </data>
+  <data name="Property_Description_ar" xml:space="preserve">
+    <value>الوصف بالعربي</value>
+  </data>
+  <data name="Property_Description_en" xml:space="preserve">
+    <value>الوصف بالإنكليزي</value>
+  </data>
+  <data name="Property_Description_fr" xml:space="preserve">
+    <value>الوصف بالفرنسي</value>
+  </data>
+  <data name="Property_Description_ru" xml:space="preserve">
+    <value>الوصف بالروسي</value>
+  </data>
+  <data name="Property_Description_tr" xml:space="preserve">
+    <value>الوصف بالتركي</value>
+  </data>
+  <data name="Property_Email" xml:space="preserve">
+    <value>البريد الإلكتروني</value>
+  </data>
+  <data name="Property_FirstName" xml:space="preserve">
+    <value>الاسم</value>
+  </data>
+  <data name="Property_Id" xml:space="preserve">
+    <value>#</value>
+  </data>
+  <data name="Property_Image" xml:space="preserve">
+    <value>الصورة</value>
+  </data>
+  <data name="Property_Images" xml:space="preserve">
+    <value>صورة المنتج</value>
+  </data>
+  <data name="Property_LastName" xml:space="preserve">
+    <value>اسم العائلة</value>
+  </data>
+  <data name="Property_MeasruingUnit" xml:space="preserve">
+    <value>وحدة القياس</value>
+  </data>
+  <data name="Property_MeasruingUnitId" xml:space="preserve">
+    <value>وحدة القياس</value>
+  </data>
+  <data name="Property_MinValue" xml:space="preserve">
+    <value>أقل كمية شراء مسموحة للمنتج</value>
+  </data>
+  <data name="Property_Name" xml:space="preserve">
+    <value>الاسم</value>
+  </data>
+  <data name="Property_Name_ar" xml:space="preserve">
+    <value>الاسم بالعربية</value>
+  </data>
+  <data name="Property_Name_en" xml:space="preserve">
+    <value>الاسم بالانكليزية</value>
+  </data>
+  <data name="Property_Name_fr" xml:space="preserve">
+    <value>الاسم بالفرنسية</value>
+  </data>
+  <data name="Property_Name_ru" xml:space="preserve">
+    <value>الاسم بالروسية</value>
+  </data>
+  <data name="Property_Name_tr" xml:space="preserve">
+    <value>الاسم بالتركية</value>
+  </data>
+  <data name="Property_NewValues" xml:space="preserve">
+    <value>القيم الحالية</value>
+  </data>
+  <data name="Property_Note" xml:space="preserve">
+    <value>ملاحظات</value>
+  </data>
+  <data name="Property_OldValues" xml:space="preserve">
+    <value>القيم السابقة</value>
+  </data>
+  <data name="Property_OrderDate" xml:space="preserve">
+    <value>تاريخ الطلبية</value>
+  </data>
+  <data name="Property_Password" xml:space="preserve">
+    <value>كلمة السر</value>
+  </data>
+  <data name="Property_PaymentMethod" xml:space="preserve">
+    <value>وسيلة الدفع</value>
+  </data>
+  <data name="Property_Permissions" xml:space="preserve">
+    <value>الصلاحيات</value>
+  </data>
+  <data name="Property_PhoneNumber" xml:space="preserve">
+    <value>رقم الموبايل</value>
+  </data>
+  <data name="Property_Price" xml:space="preserve">
+    <value>السعر</value>
+  </data>
+  <data name="Property_Price1" xml:space="preserve">
+    <value>سعر القطعة عند شراء الكمية الأولى</value>
+  </data>
+  <data name="Property_Price2" xml:space="preserve">
+    <value>سعر القطعة عند شراء الكمية الثانية</value>
+  </data>
+  <data name="Property_Price3" xml:space="preserve">
+    <value>سعر القطعة عند شراء الكمية الثالثة</value>
+  </data>
+  <data name="Property_Quantity" xml:space="preserve">
+    <value>الكمية</value>
+  </data>
+  <data name="Property_Quantity1" xml:space="preserve">
+    <value>الكمية الأولى</value>
+  </data>
+  <data name="Property_Quantity2" xml:space="preserve">
+    <value>الكمية الثانية</value>
+  </data>
+  <data name="Property_Quantity3" xml:space="preserve">
+    <value>الكمية الثالثة</value>
+  </data>
+  <data name="Property_Rate" xml:space="preserve">
+    <value>مايعادل</value>
+  </data>
+  <data name="Property_Rating" xml:space="preserve">
+    <value>التقييم</value>
+  </data>
+  <data name="Property_Roles" xml:space="preserve">
+    <value>الصلاحيات</value>
+  </data>
+  <data name="Property_SpecialRequest" xml:space="preserve">
+    <value>ملاحظات على الطلب</value>
+  </data>
+  <data name="Property_Status" xml:space="preserve">
+    <value>الحالة</value>
+  </data>
+  <data name="Property_Store" xml:space="preserve">
+    <value>المتجر</value>
+  </data>
+  <data name="Property_StoreCities" xml:space="preserve">
+    <value>المدن التي يخدمها المتجر</value>
+  </data>
+  <data name="Property_StoreCountries" xml:space="preserve">
+    <value>الدول التي يخدمها المتجر</value>
+  </data>
+  <data name="Property_StoreCurrency" xml:space="preserve">
+    <value>العملة الافتراضية</value>
+  </data>
+  <data name="Property_StoreTags" xml:space="preserve">
+    <value>الوسوم الرئيسية للمتجر</value>
+  </data>
+  <data name="Property_StoreUsers" xml:space="preserve">
+    <value>المسؤولين على المتجر</value>
+  </data>
+  <data name="Property_Symbol" xml:space="preserve">
+    <value>الرمز</value>
+  </data>
+  <data name="Property_TableName" xml:space="preserve">
+    <value>الجدول</value>
+  </data>
+  <data name="Property_Tags" xml:space="preserve">
+    <value>وسوم المتجر</value>
+  </data>
+  <data name="Property_TimeStamp" xml:space="preserve">
+    <value>الوقت</value>
+  </data>
+  <data name="Property_Title" xml:space="preserve">
+    <value>العنوان</value>
+  </data>
+  <data name="Property_Total" xml:space="preserve">
+    <value>المجموع</value>
+  </data>
+  <data name="Property_Type" xml:space="preserve">
+    <value>النوع</value>
+  </data>
+  <data name="Property_UpperCategories" xml:space="preserve">
+    <value>تنتمي إلى</value>
+  </data>
+  <data name="Property_User" xml:space="preserve">
+    <value>المستخدم</value>
+  </data>
+  <data name="Property_UserName" xml:space="preserve">
+    <value>اسم المستخدم</value>
+  </data>
+  <data name="Property_Worth" xml:space="preserve">
+    <value>بقيمة</value>
+  </data>
+  <data name="Status_Freezed" xml:space="preserve">
+    <value>مجمد</value>
+  </data>
+</root>

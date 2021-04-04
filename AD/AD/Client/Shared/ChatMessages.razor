@@ -1,0 +1,68 @@
+﻿@using AD.Shared.ViewModels.Message
+
+@inject IMessageRepository _entityRepository
+@inject IOrderRepository _orderRepository
+
+<h2 class="text-center text-primary">
+    @T["Class_Chat"]
+</h2>
+<div class="jumbotron bg-light">
+    <div class="row">
+        <div class="col-md-12" id="chat">
+            @if (entities != null)
+            {
+                @foreach (var item in entities)
+                {
+                    if (item.MessageType == MessageType.FromStore)
+                    {
+                        <div class="row">
+                            <div class="col-md-6 offset-md-6">
+                                <div class="container darker bg-primary">
+                                    <p class="sender text-right text-white"><b>@store.Name</b></p>
+                                    <p class="text-right text-white">@item.Text</p>
+                                    <span class="text-white">@item.MessageDateTime</span>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />}
+                    else
+                    {
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="container darker bg-dark">
+                                    <p class="sender text-white"><b>@item.Order?.UserC?.UserName</b></p>
+                                    <p class="text-white">@item.Text</p>
+                                    <span class="text-white">@item.MessageDateTime</span>
+                                </div>
+                            </div>
+                        </div>
+                        <hr />}
+                }
+            }
+        </div>
+    </div>
+</div>
+<div class="card user-data-card">
+    <div class="card-body">
+        <EditForm Model="entity" OnValidSubmit="Create">
+            <DataAnnotationsValidator />
+            <div class="form-group">
+                <div>
+                    <InputText class="form-control" id="messageText" @bind-Value="@entity.Text" />
+                    <ValidationMessage For="@(() => entity.Text)" />
+                </div>
+            </div>
+            <button type="submit" id="submitButton" class="btn btn-outline-primary">@T["Action_Send"]</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter] public long orderId { get; set; }
+    [Parameter] public Message entity { get; set; } = new Message();
+    [Parameter] public EventCallback Create { get; set; }
+
+    [Parameter] public List<Message> entities { get; set; }
+
+    [Parameter] public Store store { get; set; }
+}

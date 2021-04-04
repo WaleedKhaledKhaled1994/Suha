@@ -1,0 +1,117 @@
+﻿@page "/categories"
+
+@inject ICategoryRepository _entityRepository
+@inject IFavouriteRepository _favouriteRepository
+
+@attribute [Authorize(Roles = "User")]
+
+<h3 style="text-align: center;">@T["NavMenu_Categories"]</h3>
+
+<div class="form-inline">
+    <div class="form-group">
+        <a class="btn btn-success" href="favouriteCategories">@T["NavMenu_FavouriteCategories"]</a>
+        &nbsp;&nbsp;&nbsp;
+        <div class="form-group mb-2"><input @onchange="Search" class="form-control" placeholder="@T["Action_Search"]" /></div>
+        <span class="text-muted ml-5">
+            @T["Action_Search_Shwoing"] @entities.Count @T["Action_Search_OutOf"] @totalAmount
+        </span>
+    </div>
+</div>
+
+<GenericList List="entities">
+    <WholeListTemplate>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>@T["Property_Name"]</th>
+                    <th>@T["Property_Description"]</th>
+                    @*<th>@T["Property_UpperCategories"]</th>*@
+                    <th>@T["Property_Image"]</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in entities)
+                {
+                    <tr>
+                        <td>
+                            @_localizationDB.GetName(item.Category)
+                        </td>
+                        <td>
+                            @_localizationDB.GetDescription(item.Category)
+                        </td>
+                        <td>
+                            <img class="img-fluid img-thumbnail" alt="Category Image" src="@item.Category.Image" style="height:100px; width:100px;" />
+                        </td>
+                        <td>
+                            <a class="btn btn-dark" href="category/details/@item.Category.Id">@T["Action_Details"]</a>
+                            &nbsp;&nbsp;&nbsp;
+                            @if (@item.Status == FollowStatus.UnFollow)
+                            {
+                                <button class="btn btn-primary" @onclick="@(() => Follow_UnFollow(@item.Category.Id, FollowStatus.Follow))">@T["Action_Follow"]</button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-danger" @onclick="@(() => Follow_UnFollow(@item.Category.Id, FollowStatus.UnFollow))">@T["Action_UnFollow"]</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </WholeListTemplate>
+</GenericList>
+<AD.Client.Shared.Pagination CurrentPage="@paginationDTO.Page" SelectedPage="SelectedPage" TotalAmountPages="totalAmountOfPages"></AD.Client.Shared.Pagination>
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    List<CategoryForUser> entities = new List<CategoryForUser>();
+
+    PaginationSearchDTO paginationDTO = new PaginationSearchDTO() { RecordsPerPage = 8 };
+    private int totalAmountOfPages;
+    private long totalAmount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEntities();
+    }
+
+    private async Task Search(ChangeEventArgs args)
+    {
+        paginationDTO.SearchText = args.Value.ToString();
+        await LoadEntities();
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        paginationDTO.Page = page;
+        await LoadEntities();
+    }
+
+    private async Task LoadEntities()
+    {
+        var paginatedResponse = await _entityRepository.GetAllCategoriesUser(paginationDTO);
+        entities = paginatedResponse.Response;
+        totalAmountOfPages = paginatedResponse.TotalAmountPages;
+        totalAmount = paginatedResponse.TotalAmount;
+    }
+
+    private async Task Follow_UnFollow(long id, FollowStatus status)
+    {
+        try
+        {
+            await _favouriteRepository.Follow_UnFollow_Category(new CategoryFollowers { CategoryId = id, Status = status });
+            await LoadEntities();
+            if (status == FollowStatus.Follow)
+                Toaster.Success(T["Message_Follow"]);
+            else
+                Toaster.Warning(T["Message_UnFollow"]);
+        }
+        catch (Exception ex)
+        {
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    }
+}

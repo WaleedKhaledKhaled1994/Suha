@@ -1,0 +1,34 @@
+﻿@page "/paymentMethod/create"
+
+@inject IPaymentMethodRepository _entityRepository
+
+@attribute [Authorize(Roles = "Admin")]
+
+<PaymentMethodForm entity="entity" Action="@T["Action_Create"]" onValidSubmit="Create" isBusy="isBusy" />
+
+@code {
+    private PaymentMethod entity = new PaymentMethod();
+    bool isBusy = false;
+    private async Task Create()
+    {
+        try
+        {
+            isBusy = true;
+            AddPaymentMethodVMRequest paymentMethodVM = new()
+            {
+                Name = entity.Name
+            };
+            await _entityRepository.Create(paymentMethodVM);
+            Toaster.Success(T["Message_Add"]);
+
+            _navigationManager.NavigateTo("paymentMethods");
+        }
+        catch (Exception ex)
+        {
+            isBusy = false;
+
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    }
+}

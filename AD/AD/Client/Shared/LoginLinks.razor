@@ -1,0 +1,11 @@
+﻿<AuthorizeView>
+    <Authorized>
+        <span>@*Hello, @context.User.Identity.Name!*@</span>
+        <a href="Logout" class="nav-link btn btn-link">@T["Navbar_Logout"]</a>
+    </Authorized>
+    <NotAuthorized>
+            <a href="Register">@T["Navbar_Register"]</a>
+            <a href="Login" class="nav-link btn btn-link">@T["Navbar_Login"]</a>
+    </NotAuthorized>
+</AuthorizeView>
+

@@ -1,0 +1,138 @@
+﻿@page "/Order/edit/{orderId:long}"
+
+@inject IOrderRepository _entityRepository
+
+@attribute [Authorize(Roles = "User")]
+
+<div class="page-content-wrapper">
+    <div class="container">
+        <div class="profile-wrapper-area py-3">
+            <div class="card user-info-card">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="user-info">
+                        <h3>@T["Action_Edit"] @T["Class_Order"]</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="card user-data-card">
+                <div class="card-body">
+                    <EditForm Model="entity" OnValidSubmit="Save">
+                        <DataAnnotationsValidator />
+                        <div class="form-group">
+                            <label>@T["Property_Status"]:</label>
+                            <div>
+                                <div>
+                                    <select class="form-control" @onchange="@onChangeOrderStatus" value="@entity.Status">
+                                        <option value="0">
+                                            @T["Action_Select"]
+                                        </option>
+                                        @foreach (var item in Enum.GetValues(typeof(OrderStatus)))
+                                        {
+                                            OrderStatus orderStatus = (OrderStatus)item;
+                                            if ((int)orderStatus >= oldOrderStatus && (int)orderStatus < 4)
+                                            {
+                                                <option value="@item">@item</option>
+                                            }
+                                        }
+                                    </select>
+                                    <ValidationMessage For="@(() => entity.Status)" />
+                                </div>
+                                <br />
+                                @if (entity.Status == OrderStatus.InShipping)
+                                {
+                                    <div>
+                                        <input type="number" class="form-control" min="0" @onchange="onChangeShippingDays" required />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <button class="btn btn-success" disabled=@isBusy type="submit">@T["Action_Save"]</button>
+                        <a class="btn btn-primary" href="/storeOrders/@entity.Product?.StoreId">@T["Action_Back_To_List"]</a>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code
+{
+    [Parameter] public long orderId { get; set; }
+    private Order entity;
+    bool isBusy = false;
+
+    private int shippingDays = -1;
+    private int oldOrderStatus;
+
+    protected override async Task OnInitializedAsync()
+    {
+        oldOrderStatus = (int)entity.Status;
+        entity = await _entityRepository.Get(orderId);
+
+        if (entity == null)
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+        var userRoles = await _roleRepository.GetRolesForStore(entity.Product.StoreId);
+
+        if (!userRoles.Contains(EmployeeRole.ManageOrders))
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+    }
+
+    private void onChangeShippingDays(ChangeEventArgs args)
+    {
+        shippingDays = Convert.ToInt32(args.Value.ToString());
+        entity.ShippingDate = DateTime.UtcNow.AddDays(shippingDays);
+    }
+
+    private void onChangeOrderStatus(ChangeEventArgs e)
+    {
+        var str = e.Value.ToString();
+        if (str != "0")
+            entity.Status = (OrderStatus)Enum.Parse(typeof(OrderStatus), e.Value.ToString());
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            isBusy = true;
+            var title = T["Event_Order_Edited"];
+            var body = $"{entity.Product.Name}/ {entity.Quantity.ToString()}/ {entity.Status}";
+            var type = NotificationType.OrderEdit;
+            List<long> userCIds = new List<long>();
+            userCIds.Add(entity.UserCId);
+
+            AddNotificationVMRequest addNotificationVM = new AddNotificationVMRequest()
+            {
+                Title = title,
+                Body = body,
+                Type = type,
+                UserCIds = userCIds,
+                Link = "/Orders"
+            };
+
+            EditOrderVMRequest orderVM = new()
+            {
+                Id = entity.Id,
+                ShippingDate = shippingDays,
+                Status = entity.Status,
+                AddNotificationVM = addNotificationVM
+            };
+
+            await _entityRepository.Edit(orderVM);
+            _navigationManager.NavigateTo($"/storeOrders/{entity.Product?.StoreId}");
+            Toaster.Success(T["Message_OrderUpdated"]);
+        }
+        catch (Exception ex)
+        {
+            isBusy = false;
+
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    } }

@@ -1,0 +1,50 @@
+﻿@page "/category/create"
+
+@inject ICategoryRepository _entityRepository
+
+@attribute [Authorize(Roles = "Admin")]
+
+<CategoryForm entity="entity" Action="@T["Action_Create"]" onValidSubmit="Create" isBusy="isBusy" />
+
+@code {
+    private Category entity = new Category();
+    bool isBusy = false;
+
+
+    private async Task Create()
+    {
+        try
+        {
+            isBusy = true;
+            AddCategoryVMRequest categoryVM = new()
+            {
+                Name_ar = entity.Name_ar,
+                Name_en = entity.Name_en,
+                Name_fr = entity.Name_fr,
+                Name_tr = entity.Name_tr,
+                Name_ru = entity.Name_ru,
+                Description_ar = entity.Description_ar,
+                Description_en = entity.Description_en,
+                Description_fr = entity.Description_fr,
+                Description_tr = entity.Description_tr,
+                Description_ru = entity.Description_ru,
+                CategoryLevel = entity.CategoryLevel,
+                ParentId = entity.ParentId,
+                Image = entity.Image
+            };
+
+            await _entityRepository.Create(categoryVM);
+
+            Toaster.Success(T["Message_Add"]);
+
+            _navigationManager.NavigateTo("categoriesAdmin");
+        }
+        catch (Exception ex)
+        {
+            isBusy = false;
+
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    }
+}

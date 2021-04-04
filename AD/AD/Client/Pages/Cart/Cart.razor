@@ -1,0 +1,144 @@
+﻿@page "/cart"
+
+@using AD.Shared.ViewModels.Order
+@inject IOrderRepository _entityRepository
+@inject IProductRepository _productRepository
+
+@attribute [Authorize(Roles = "User")]
+
+<div class="page-content-wrapper">
+    <div class="container">
+        <div class="profile-wrapper-area py-3">
+            <div class="card user-info-card">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="user-info">
+                        <h3>@T["NavMenu_Cart"]</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="card user-data-card">
+                <div class="card-body" style="overflow: scroll;height: 485px">
+                    @foreach (var item in dic)
+                    {
+                        <p>@T["Property_Price"]: @item.Value.Total</p>
+                        <p>@T["Class_Product"]: @item.Value.Product.Name</p>
+                        <p>@T["Class_Store"]: @item.Value.Color</p>
+                        <p>@T["Property_Note"]: @item.Value.CustomerNote</p>
+                        <p>@T["Property_PaymentMethod"]: @item.Value.StorePaymentMethod.PaymentMethod?.Name</p>
+                        <p>@T["Property_MeasruingUnit"]: @_localizationDB.GetName(item.Value.Product?.MeasruingUnit)</p>
+                        <input type="button" class="btn btn-dark" value="@T["Action_ConfirmOrder"]" @onclick="() => submitOrder(item.Value, item.Key)" />
+                        <input type="button" class="btn btn-danger" value="X" @onclick="() => removeItem(item.Key)" />
+                        <hr />
+                    }
+                </div>
+                <hr />
+                <h1>@T["Property_Total"] = @total</h1>
+                <input type="button" class="btn btn-dark" value="@T["Action_ConfirmOrders"]" @onclick="() => submitAll(dic)" />
+                <br />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    private int? max;
+    private decimal total = 0;
+    Dictionary<int, ProductCartDTO> dic = new Dictionary<int, ProductCartDTO>();
+
+    protected async override Task OnInitializedAsync()
+    {
+        max = await _localStorage.GetItemAsync<int>("max");
+
+        await LoadCart();
+    }
+
+    private async Task removeItem(int i)
+    {
+        await _localStorage.RemoveItemAsync($"{i}");
+        await LoadCart();
+    }
+
+    private async Task submitOrder(ProductCartDTO productCartDTO, int i)
+    {
+        try
+        {
+            AddOrderVMRequest orderVMRequest = new AddOrderVMRequest()
+            {
+                ProductId = productCartDTO.Product.Id,
+                Quantity = productCartDTO.Quantity,
+                Total = productCartDTO.Total,
+                StorePaymentMethodId = productCartDTO.StorePaymentMethod.Id
+            };
+
+            await _entityRepository.Create(orderVMRequest);
+            Toaster.Success(T["Message_Add"]);
+
+            await removeItem(i);
+
+        }
+        catch (Exception ex)
+        {
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    }
+
+    private async Task submitAll(Dictionary<int, ProductCartDTO> dic)
+    {
+        try
+        {
+            List<AddOrderVMRequest> list = new List<AddOrderVMRequest>();
+            foreach (var item in dic)
+            {
+                if (item.Value != null)
+                {
+                    AddOrderVMRequest orderVMRequest = new AddOrderVMRequest()
+                    {
+                        ProductId = item.Value.Product.Id,
+                        Quantity = item.Value.Quantity,
+                        Total = item.Value.Total,
+                        StorePaymentMethodId = item.Value.StorePaymentMethod.Id
+                    };
+                    list.Add(orderVMRequest);
+                }
+            }
+
+            await _entityRepository.CreateAll(list);
+
+            for (int j = 0; j <= max; j++)
+            {
+                var productCartDTO = await _localStorage.GetItemAsync<ProductCartDTO>($"{j}");
+                if (productCartDTO != null)
+                    await removeItem(j);
+            }
+            Toaster.Success(T["Message_Add"]);
+            await LoadCart();
+
+            _navigationManager.NavigateTo("/myOrders");
+        }
+
+        catch (Exception ex)
+        {
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    }
+
+    private async Task LoadCart()
+    {
+        total = 0;
+        dic.Clear();
+        for (int j = 0; j <= max; j++)
+        {
+            var productCartDTO = await _localStorage.GetItemAsync<ProductCartDTO>($"{j}");
+            if (productCartDTO != null)
+            {
+                dic.Add(j, productCartDTO);
+                total = total + productCartDTO.Total;
+            }
+        }
+    }
+}

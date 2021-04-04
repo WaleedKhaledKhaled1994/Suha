@@ -1,0 +1,75 @@
+﻿@page "/error/details/{entityId:long}"
+
+@inject IErrorLogsRepository _entityRepository
+
+@using System.Xml.Linq;
+
+@attribute [Authorize(Roles = "Admin")]
+
+@if (entity == null)
+{
+    <img src="/images/Loading.gif" alt="Loading..." style="display: block; margin-left: auto; margin-right: auto; width: 50%;" />
+}
+else
+{
+
+    <div class="card shadow">
+        <div class="card-body">
+            <dl class="row">
+                <dd class="col-sm-12">
+                    <div class="h4">
+                        @entity.Message
+                    </div>
+                    <hr class="mb-1" />
+                </dd>
+                <dd class="col-sm-9">
+                    <div class="h4">
+                        Message Template
+                    </div>
+                    <small> @entity.MessageTemplate </small>
+                </dd>
+                <dd class="col-sm-3 text-right border-left ">
+                    <span class='badge my-2 badge-pill badge-@(entity.Level == "Error" ? "danger": entity.Level.ToLower())'>
+                        @entity.Level
+                    </span><br />
+                    <small data-date="cal">@entity.TimeStamp</small>
+                </dd>
+                <dd class="col-sm-12">
+                    <div class="h4">
+                        Exception
+                    </div>
+                    <pre class="border p-2 bg-lighter">@entity.Exception</pre>
+                </dd>
+                <dd class="col-sm-12">
+                    <div class="h4">
+                        Properties
+                    </div>
+                    <pre class="border p-2 bg-lighter">@XDocument.Parse(entity.Properties).ToString()</pre>
+                </dd>
+            </dl>
+            <div class="text-right ">
+                <a class="btn btn-primary" href="errors"><i data-feather="corner-down-left" class="pr-1"></i> @T["Action_Back_To_List"]</a>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    [Parameter] public long entityId { get; set; }
+
+    private WebApiLogs entity;
+
+    private string Message;
+
+    protected async override Task OnInitializedAsync()
+    {
+        entity = await _entityRepository.Get(entityId);
+        if (entity == null)
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+        Message = entity.Message.Replace("\n", "\n");
+    }
+}

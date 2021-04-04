@@ -1,0 +1,90 @@
+﻿@using Microsoft.AspNetCore.Components.CompilerServices
+
+@*<button class="btn btn-primary" @onclick="@addCompoment">Add New Color</button>*@
+
+<Button Color="Color.Primary" Clicked="@addCompoment">Add New Color</Button>
+
+<div class="simple-list-list">
+    @if (componentListTest == null)
+    {
+        <p>You have no items in your list</p>
+    }
+    else
+    {
+        <ul>
+            @foreach (var item in componentListTest)
+            {
+                <li>
+                    @item
+                    <br />
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter] public EventCallback<List<string>> ColorChanged { get; set; }
+
+    public void SetValue(Parameter parameter)
+    {
+        if (parameter.Value == "Deleted")
+        {
+            values.Remove(parameter.Id);
+        }
+        else
+        {
+            if (values.Count > 0)
+            {
+                var z = values.Keys.Max();
+                if (parameter.Id > z)
+                    values.Add(parameter.Id, parameter.Value);
+                else
+                    values[parameter.Id] = parameter.Value;
+            }
+            else
+                values.Add(parameter.Id, parameter.Value);
+        }
+        List<string> colors = new List<string>();
+        foreach (var item in values)
+        {
+            colors.Add(item.Value);
+        }
+        ColorChanged.InvokeAsync(colors);
+    }
+
+    public List<RenderFragment> componentListTest { get; set; }
+    public Dictionary<int, string> values = new Dictionary<int, string>();
+    public int currentCount { get; set; }
+
+    protected override void OnInitialized()
+    {
+        currentCount = 0;
+        componentListTest = new List<RenderFragment>();
+    }
+
+    protected void addCompoment()
+    {
+        if (componentListTest == null)
+        {
+            componentListTest = new List<RenderFragment>();
+        }
+        componentListTest.Add(CreateDynamicComponent(currentCount));
+        currentCount++;
+    }
+
+    RenderFragment CreateDynamicComponent(int counter) => builder =>
+    {
+        try
+        {
+            builder.OpenComponent(0, typeof(CustomColorPicker));
+            builder.AddAttribute(1, "id", counter);
+            builder.AddAttribute(2, "SetValue", RuntimeHelpers.TypeCheck<EventCallback<Parameter>>(EventCallback.Factory.Create<Parameter>(this, this.SetValue)));
+            builder.CloseComponent();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    };
+}

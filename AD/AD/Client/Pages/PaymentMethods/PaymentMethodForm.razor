@@ -1,0 +1,38 @@
+﻿@attribute [Authorize(Roles = "Admin")]
+
+<div class="page-content-wrapper">
+    <div class="container">
+        <div class="profile-wrapper-area py-3">
+            <div class="card user-info-card">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="user-info">
+                        <h3>@Action @T["Class_PaymentMethod"]</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="card user-data-card">
+                <div class="card-body">
+                    <EditForm Model="entity" OnValidSubmit="onValidSubmit">
+                        <DataAnnotationsValidator />
+                        <div class="form-group">
+                            <label>@T["Property_Name"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Name" />
+                                <ValidationMessage For="@(() => entity.Name)" />
+                            </div>
+                        </div>
+                        <button class="btn btn-success" disabled=@isBusy type="submit">@T["Action_Save"]</button>
+                        <a class="btn btn-primary" href="paymentMethods">@T["Action_Back_To_List"]</a>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public PaymentMethod entity { get; set; }
+    [Parameter] public string Action { get; set; }
+    [Parameter] public EventCallback onValidSubmit { get; set; }
+    [Parameter] public bool isBusy { get; set; }
+}

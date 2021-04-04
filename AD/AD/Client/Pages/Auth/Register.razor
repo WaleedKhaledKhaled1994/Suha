@@ -1,0 +1,217 @@
+﻿@page "/register"
+
+@inject IAccountRepository _accountRepository
+@inject ILoginService _loginService
+@inject ICityRepository _cityRepository
+@inject ICountryRepository _countryRepository
+@inject ICurrencyRepository _currencyRepository
+@inject IUserCRepository _UserCRepository
+
+@using AD.Client.Auth
+
+@inject Sotsera.Blazor.Toaster.IToaster Toaster
+@inject IStringLocalizer<Resource> T
+
+<div class="page-content-wrapper">
+    <div class="container">
+        <div class="profile-wrapper-area py-3">
+            <div class="card user-info-card">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="user-info">
+                        <h3>@T["Action_Register"]</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="card user-data-card">
+                <div class="card-body">
+                    <EditForm Model="registerDTO" OnValidSubmit="CreateUser">
+                        <DataAnnotationsValidator />
+                        <div class="form-group">
+                            <label>@T["Property_PhoneNumber"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@registerDTO.PhoneNumber" />
+                                <ValidationMessage For="@(() => registerDTO.PhoneNumber)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_UserName"]:</label>
+                            <div>
+                                <InputText @bind-Value="@registerDTO.UserName" @onfocusout="() => {checkUserNameUnique();}" class="form-control" />
+                                <ValidationMessage For="@(() => registerDTO.UserName)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_FirstName"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@registerDTO.FirstName" />
+                                <ValidationMessage For="@(() => registerDTO.FirstName)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_LastName"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@registerDTO.LastName" />
+                                <ValidationMessage For="@(() => registerDTO.LastName)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Email"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@registerDTO.Email" />
+                                <ValidationMessage For="@(() => registerDTO.Email)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_BirthYear"]:</label>
+                            <div>
+                                <input type="number" class="form-control" max="@maxDate" min="@minDate" @bind-value="registerDTO.BirthYear" />
+                                <ValidationMessage For="@(() => registerDTO.BirthYear)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Country"]:</label>
+                            <Autocomplete Data="@Countries"
+                                          TextField="@((item)=>_localizationDB.GetName(item))"
+                                          ValueField="@((item)=>item.Id)"
+                                          SelectedValueChanged="@ChangeCountryHandler"
+                                          Placeholder="" />
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_City"]:</label>
+                            <Validation Validator="@ValidationRule.IsNotEmpty">
+                                <Autocomplete Data="@Cities"
+                                              TextField="@((item)=>_localizationDB.GetName(item))"
+                                              ValueField="@((item)=>item.Id)"
+                                              SelectedValue="@registerDTO.CityId"
+                                              SelectedValueChanged="@ChangeCityHandler"
+                                              Placeholder="" />
+                            </Validation>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Currency"]:</label>
+                            <Validation Validator="@ValidationRule.IsNotEmpty">
+                                <Autocomplete Data="@Currencies"
+                                              TextField="@((item)=>item.Code)"
+                                              ValueField="@((item)=>item.Id)"
+                                              SelectedValue="@registerDTO.CurrencyId"
+                                              SelectedValueChanged="@ChangeCurrencyHandler"
+                                              Placeholder="" />
+                            </Validation>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Password"]:</label>
+                            <div>
+                                <InputPassword class="form-control" @bind-Value="@registerDTO.Password" />
+                                <ValidationMessage For="@(() => registerDTO.Password)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_ConfirmPassword"]:</label>
+                            <div>
+                                <InputPassword class="form-control" @bind-Value="@registerDTO.ConfirmPassword" />
+                                <ValidationMessage For="@(() => registerDTO.ConfirmPassword)" />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" disabled=@isBusy>@T["Action_Register"]</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code{
+    private RegisterDTO registerDTO = new RegisterDTO();
+    private int maxDate = DateTime.Now.AddYears(-10).Year;
+    private int minDate = DateTime.Now.AddYears(-100).Year;
+
+    private List<Country> Countries = new List<Country>();
+    private List<City> AllCities = new List<City>();
+    private List<City> Cities = new List<City>();
+    private List<Currency> Currencies = new List<Currency>();
+    private List<UserC> Users = new List<UserC>();
+    private List<string> UserNameList = new List<string>();
+
+    bool userNameValid = false;
+    bool isBusy = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Countries = await _countryRepository.Get();
+        AllCities = await _cityRepository.Get();
+        Cities = AllCities;
+        Currencies = await _currencyRepository.Get();
+
+        Users = await _UserCRepository.Get();
+        foreach (var item in Users)
+        {
+            UserNameList.Add(item.UserName);
+        }
+    }
+
+    private void ChangeCountryHandler(object newValue)
+    {
+        if (newValue == null)
+            Cities = AllCities;
+        else
+            Cities = AllCities.Where(x => x.CountryId == (long)newValue).ToList();
+    }
+
+    private void ChangeCityHandler(object newValue)
+    {
+        if (newValue != null)
+            registerDTO.CityId = (long)newValue;
+    }
+
+    private void ChangeCurrencyHandler(object newValue)
+    {
+        if (newValue != null)
+            registerDTO.CurrencyId = (long)newValue;
+    }
+
+    private void checkUserNameUnique()
+    {
+        if (UserNameList.Contains(registerDTO.UserName))
+        {
+            userNameValid = false;
+            Toaster.Error(@T["Message_UserName_error"]);
+        }
+        else
+            userNameValid = true;
+    }
+
+    private async Task CreateUser()
+    {
+        try
+        {
+            isBusy = true;
+            if (userNameValid)
+            {
+                if (registerDTO.CityId == 0)
+                {
+                    isBusy = false;
+                    Toaster.Error(@T["Message_City_error"]);
+                }
+                else
+                {
+                    var userToken = await _accountRepository.Register(registerDTO);
+                    //await _loginService.Login(userToken);
+
+                    Toaster.Success(@T["Message_Register_success"]);
+                    _navigationManager.NavigateTo("login");
+                }
+            }
+            else
+            {
+                isBusy = false;
+                Toaster.Error(@T["Message_UserName_error"]);
+            }
+        }
+        catch (Exception ex)
+        {
+            isBusy = false;
+            Toaster.Error(@T["Message_Register_error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    }
+}

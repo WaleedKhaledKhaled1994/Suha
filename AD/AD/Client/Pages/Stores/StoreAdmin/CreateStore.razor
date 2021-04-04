@@ -1,0 +1,68 @@
+﻿@page "/store/create"
+
+@inject IStoreRepository _storeRepository
+@inject ITagRepository _tagRepository
+@inject ICountryRepository _countryRepository
+@inject ICityRepository _cityRepository
+
+@attribute [Authorize(Roles = "User")]
+
+<AD.Client.Pages.Stores.StoreAdmin.StoreForm entity="entity" Action="@T["Action_Create"]"
+           onValidSubmit="Create"
+           NotSelectedTags="NotSelectedTags"
+           NotSelectedCountries="NotSelectedCountries"
+           NotSelectedCities="NotSelectedCities"
+           isBusy="isBusy" />
+
+@code {
+    private Store entity = new Store();
+    private List<Tag> NotSelectedTags = new List<Tag>();
+    private List<Country> NotSelectedCountries = new List<Country>();
+    private List<City> NotSelectedCities = new List<City>();
+    bool isBusy = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            NotSelectedTags = await _tagRepository.Get();
+            NotSelectedCountries = await _countryRepository.Get();
+            NotSelectedCities = await _cityRepository.Get();
+        }
+        catch (Exception)
+        {
+            Toaster.Error(T["Message_Error"]);
+        }
+    }
+
+    private async Task Create()
+    {
+        try
+        {
+            isBusy = true;
+            AddStoreVMRequest StoreVM = new()
+            {
+                Name = entity.Name,
+                Address = entity.Address,
+                CityId = entity.CityId,
+                CurrencyId = entity.CurrencyId,
+                Image = entity.Image,
+                Tags = entity.StoreTags.Select(x => x.TagId).ToList(),
+                Countries = entity.StoreCountries.Select(x => x.CountryId).ToList(),
+                Cities = entity.StoreCities.Select(x => x.CityId).ToList(),
+                Users = entity.StoreUsers.Select(x => x.UserCId).ToList(),
+                PaymentMethods = entity.StorePaymentMethods.Select(x => new PaymentMethodDTO { PaymentMethodId = x.PaymentMethodId, Details = x.Details }).ToList()
+            };
+            await _storeRepository.Create(StoreVM);
+            Toaster.Success(T["Message_Add"]);
+
+            _navigationManager.NavigateTo("MyStores");
+        }
+        catch (Exception ex)
+        {
+            isBusy = false;
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    }
+}

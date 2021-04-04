@@ -1,0 +1,137 @@
+﻿<div class="top-row pl-4 navbar navbar-dark">
+    <a class="navbar-brand" href="">AD</a>
+    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <ul class="nav flex-column">
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> @T["NavMenu_Home"]
+            </NavLink>
+        </li>
+        <AuthorizeView Roles="Admin">
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="tags">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_Tags"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="CategoriesAdmin">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_Categories"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="Countries">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_Countries"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="Cities">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_Cities"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="currencies">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_Currencies"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="paymentMethods">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_PaymentMethods"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="measruingUnits">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_MeasruingUnits"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="storesAdmin">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_Stores"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="productsAdmin">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_Products"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="users">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_Users"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="errors">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_Errors_Log"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="audits">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_Audits"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="hangfire">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_HangFire"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="swagger/index.html">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_Swagger"]
+                </NavLink>
+            </li>
+        </AuthorizeView>
+
+        <AuthorizeView Roles="User">
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="notifications">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_Notifications"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="cart">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_Cart"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="myOrders">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_MyOrders"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="categories">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_Categories"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="stores">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_Stores"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="myStores">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_MyStores"]
+                </NavLink>
+            </li>
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="products">
+                    <span class="oi oi-plus" aria-hidden="true"></span> @T["NavMenu_Products"]
+                </NavLink>
+            </li>
+        </AuthorizeView>
+    </ul>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

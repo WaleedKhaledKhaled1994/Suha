@@ -1,0 +1,519 @@
+﻿@inject ICategoryRepository _categoryRepository
+@inject IStoreRepository _storeRepository
+@inject IMeasruingUnitRepository _measruingUnitRepository
+@inject ICurrencyRepository _currencyRepository
+
+@attribute [Authorize(Roles = "User")]
+
+<div class="page-content-wrapper">
+    <div class="container">
+        <div class="profile-wrapper-area py-3">
+            <div class="card user-info-card">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="user-info">
+                        <h3>@Action @T["Class_Product"]</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="card user-data-card">
+                <div class="card-body">
+                    <EditForm Model="entity" OnValidSubmit="onTestSubmit">
+                        <DataAnnotationsValidator />
+                        <div class="form-group">
+                            <label>@T["Property_Store"]:</label>
+                            <div>
+                                <input class="form-control" value="@store.Name" disabled />
+
+                            </div>
+                        </div>
+                        @{
+                            #region Category
+                            <div class="form-group">
+                                <label>@T["Property_Category"]:</label>
+                                <div>
+                                    <select class="form-control" @onchange="@onChangeCategory">
+                                        <option value="0">
+                                            @T["Action_Select"]
+                                        </option>
+                                        @foreach (var item in Categories)
+                                        {
+                                            if (category == item.Id)
+                                            {
+                                                <option value="@item.Id" selected>
+                                                    @_localizationDB.GetName(item)
+                                                </option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.Id">
+                                                    @_localizationDB.GetName(item)
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            if (Categories_L1.Any())
+                            {
+                                <div class="form-group">
+                                    <label>@T["Property_CategoryL1"]:</label>
+                                    <div>
+                                        <select class="form-control" @onchange="@onChangeCategoryL1">
+                                            <option value="0">
+                                                @T["Action_Select"]
+                                            </option>
+                                            @foreach (var item in Categories_L1)
+                                            {
+                                                if (category_L1 == item.Id)
+                                                {
+                                                    <option value="@item.Id" selected>
+                                                        @_localizationDB.GetName(item)
+                                                    </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.Id">
+                                                        @_localizationDB.GetName(item)
+                                                    </option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            }
+                            if (Categories_L2.Any())
+                            {
+                                <div class="form-group">
+                                    <label>@T["Property_CategoryL2"]:</label>
+                                    <div>
+                                        <select class="form-control" @onchange="@onChangeCategoryL2">
+                                            <option value="0">
+                                                @T["Action_Select"]
+                                            </option>
+                                            @foreach (var item in Categories_L2)
+                                            {
+                                                if (category_L2 == item.Id)
+                                                {
+                                                    <option value="@item.Id" selected>
+                                                        @_localizationDB.GetName(item)
+                                                    </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.Id">
+                                                        @_localizationDB.GetName(item)
+                                                    </option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            }
+                            if (Categories_L3.Any())
+                            {
+                                <div class="form-group">
+                                    <label>@T["Property_CategoryL3"]:</label>
+                                    <div>
+                                        <select class="form-control" @onchange="@onChangeCategoryL3">
+                                            <option value="0">
+                                                @T["Action_Select"]
+                                            </option>
+                                            @foreach (var item in Categories_L3)
+                                            {
+                                                if (category_L3 == item.Id)
+                                                {
+                                                    <option value="@item.Id" selected>
+                                                        @_localizationDB.GetName(item)
+                                                    </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.Id">
+                                                        @_localizationDB.GetName(item)
+                                                    </option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            }
+                            if (Categories_L4.Any())
+                            {
+                                <div class="form-group">
+                                    <label>@T["Property_CategoryL4"]:</label>
+                                    <div>
+                                        <select class="form-control" @onchange="@onChangeCategoryL4">
+                                            <option value="0">
+                                                @T["Action_Select"]
+                                            </option>
+                                            @foreach (var item in Categories_L4)
+                                            {
+                                                if (category_L4 == item.Id)
+                                                {
+                                                    <option value="@item.Id" selected>
+                                                        @_localizationDB.GetName(item)
+                                                    </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.Id">
+                                                        @_localizationDB.GetName(item)
+                                                    </option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            }
+                            #endregion
+                        }
+                        <div class="form-group">
+                            <label>@T["Property_CodeStore"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Product.CodeStore" />
+                                <ValidationMessage For="@(() => entity.Product.CodeStore)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Brand"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Product.Brand" />
+                                <ValidationMessage For="@(() => entity.Product.Brand)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Name"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Product.Name" />
+                                <ValidationMessage For="@(() => entity.Product.Name)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Description"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Product.Description" />
+                                <ValidationMessage For="@(() => entity.Product.Description)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_MeasruingUnitId"]:</label>
+                            <div>
+                                <select class="form-control" @bind="@entity.Product.MeasruingUnitId">
+                                    <option value="0">
+                                        @T["Action_Select"]
+                                    </option>
+                                    @foreach (var item in MeasruingUnits)
+                                    {
+                                        <option value="@item.Id">
+                                            @_localizationDB.GetName(item)
+                                        </option>
+                                    }
+                                </select>
+                                <ValidationMessage For="@(() => entity.Product.MeasruingUnitId)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_MinValue"]:</label>
+                            <div>
+                                <InputNumber class="form-control" @bind-Value="@entity.Product.MinValue" />
+                                <ValidationMessage For="@(() => entity.Product.MinValue)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Colors"]:</label>
+                            <br />
+                            @foreach (var item in entity.OldColors)
+                            {
+                                <input type="color" value="@item" disabled />
+                                <span>&nbsp; @item &nbsp;</span>
+                                <span class="btn btn-danger" @onclick="()=>onRemoveColor(item)">X</span>
+                                <br />
+                            }
+                            <CustomColorPicker_Parent ColorChanged="ColorChanged" />
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Currency"]:</label>
+                            <Autocomplete Data="@Currencies"
+                                          TextField="@((item)=>item.Code)"
+                                          ValueField="@((item)=>item.Id)"
+                                          SelectedValue="@entity.Product.CurrencyId"
+                                          SelectedValueChanged="@ChangeCurrenctHandler"
+                                          Placeholder="" />
+                            <ValidationMessage For="@(() => entity.Product.CurrencyId)" />
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Price"]:</label>
+                            <div>
+                                <InputNumber class="form-control" @bind-Value="@entity.Product.Price" />
+                                <ValidationMessage For="@(() => entity.Product.Price)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Quantity1"]:</label>
+                            <div>
+                                <InputNumber class="form-control" @bind-Value="@entity.Product.Quantity1" />
+                                <ValidationMessage For="@(() => entity.Product.Quantity1)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Price1"]:</label>
+                            <div>
+                                <InputNumber class="form-control" @bind-Value="@entity.Product.Price1" />
+                                <ValidationMessage For="@(() => entity.Product.Price1)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Quantity2"]:</label>
+                            <div>
+                                <InputNumber class="form-control" @bind-Value="@entity.Product.Quantity2" />
+                                <ValidationMessage For="@(() => entity.Product.Quantity2)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Price2"]:</label>
+                            <div>
+                                <InputNumber class="form-control" @bind-Value="@entity.Product.Price2" />
+                                <ValidationMessage For="@(() => entity.Product.Price2)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Quantity3"]:</label>
+                            <div>
+                                <InputNumber class="form-control" @bind-Value="@entity.Product.Quantity3" />
+                                <ValidationMessage For="@(() => entity.Product.Quantity3)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Price3"]:</label>
+                            <div>
+                                <InputNumber class="form-control" @bind-Value="@entity.Product.Price3" />
+                                <ValidationMessage For="@(() => entity.Product.Price3)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Note"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Product.Note" />
+                                <ValidationMessage For="@(() => entity.Product.Note)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Images"]:</label>
+                            <br />
+                            @foreach (var item in entity.OldImages)
+                            {
+                                <img class="img-fluid img-thumbnail" alt="Product Image" src="@item" style="height:100px; width:100px;" />
+                                <span class="btn btn-danger" @onclick="()=>onRemoveImage(item)">X</span>
+                                <br />
+                                <br />
+                            }
+                            <CustomInputImage_Parent ImageChanged="ImageChanged" />
+                        </div>
+                        <button class="btn btn-success" type="submit">@T["Action_Save"]</button>
+                        <a class="btn btn-primary" href="products">@T["Action_Back_To_List"]</a>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public ProductDetailsDTO entity { get; set; }
+    [Parameter] public string Action { get; set; }
+    [Parameter] public EventCallback onValidSubmit { get; set; }
+    [Parameter] public bool isBusy { get; set; }
+
+    bool valid = false;
+    private Store store = new();
+
+    List<MeasruingUnit> MeasruingUnits = new List<MeasruingUnit>();
+    List<Category> Categories = new List<Category>();
+    List<Category> Categories_L1 = new List<Category>();
+    List<Category> Categories_L2 = new List<Category>();
+    List<Category> Categories_L3 = new List<Category>();
+    List<Category> Categories_L4 = new List<Category>();
+
+    List<Currency> Currencies = new List<Currency>();
+
+    private long category, category_L1, category_L2, category_L3, category_L4;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var query = await _categoryRepository.Get();
+        Categories = query.Where(s => s.CategoryLevel == CategoryLevel.Category).ToList();
+
+        switch (entity.UpperCategories.Count())
+        {
+            case 4:
+                category = entity.UpperCategories[0].Id;
+                category_L1 = entity.UpperCategories[1].Id;
+                Categories_L1 = query.Where(x => x.ParentId == category).ToList();
+                category_L2 = entity.UpperCategories[2].Id;
+                Categories_L2 = query.Where(x => x.ParentId == category_L1).ToList();
+                category_L3 = entity.UpperCategories[3].Id;
+                Categories_L3 = query.Where(x => x.ParentId == category_L2).ToList();
+                category_L4 = entity.Product.CategoryId;
+                Categories_L4 = query.Where(x => x.ParentId == category_L3).ToList();
+                break;
+            case 3:
+                category = entity.UpperCategories[0].Id;
+                category_L1 = entity.UpperCategories[1].Id;
+                Categories_L1 = query.Where(x => x.ParentId == category).ToList();
+                category_L2 = entity.UpperCategories[2].Id;
+                Categories_L2 = query.Where(x => x.ParentId == category_L1).ToList();
+                category_L3 = entity.Product.CategoryId;
+                Categories_L3 = query.Where(x => x.ParentId == category_L2).ToList();
+                break;
+            case 2:
+                category = entity.UpperCategories[0].Id;
+                category_L1 = entity.UpperCategories[1].Id;
+                Categories_L1 = query.Where(x => x.ParentId == category).ToList();
+                category_L2 = entity.Product.CategoryId;
+                Categories_L2 = query.Where(x => x.ParentId == category_L1).ToList();
+                break;
+            case 1:
+                category = entity.UpperCategories[0].Id;
+                category_L1 = entity.Product.CategoryId;
+                Categories_L1 = query.Where(x => x.ParentId == category).ToList();
+                break;
+            case 0:
+                category = entity.Product.CategoryId;
+                break;
+            default:
+                break;
+        }
+
+        MeasruingUnits = await _measruingUnitRepository.Get();
+        Currencies = await _currencyRepository.Get();
+        store = await _storeRepository.Get(entity.Product.StoreId);
+        entity.Product.CurrencyId = store.CurrencyId;
+
+        foreach (var item in entity.Colors)
+            entity.OldColors.Add(item);
+        foreach (var item in entity.Images)
+            entity.OldImages.Add(item);
+
+        entity.Colors.Clear();
+        entity.Images.Clear();
+    }
+
+    private void onRemoveColor(string color)
+    {
+        entity.OldColors.Remove(color);
+    }
+    private void onRemoveImage(string image)
+    {
+        entity.OldImages.Remove(image);
+    }
+
+    private async Task onChangeCategory(ChangeEventArgs e)
+    {
+        var str = e.Value.ToString();
+        category = long.Parse(str);
+
+        var query = await _categoryRepository.Get();
+        query = query.Where(s => s.CategoryLevel == CategoryLevel.Category_L1).ToList();
+        Categories_L1 = query.Where(x => x.ParentId == category).ToList();
+        StateHasChanged();
+        Categories_L2.Clear(); category_L2 = 0;
+        Categories_L3.Clear(); category_L3 = 0;
+        Categories_L4.Clear(); category_L4 = 0;
+    }
+    private async Task onChangeCategoryL1(ChangeEventArgs e)
+    {
+        var str = e.Value.ToString();
+        category_L1 = long.Parse(str);
+
+        var query = await _categoryRepository.Get();
+        query = query.Where(s => s.CategoryLevel == CategoryLevel.Category_L2).ToList();
+        Categories_L2 = query.Where(x => x.ParentId == category_L1).ToList();
+        Categories_L3.Clear(); category_L3 = 0;
+        Categories_L4.Clear(); category_L4 = 0;
+    }
+    private async Task onChangeCategoryL2(ChangeEventArgs e)
+    {
+        var str = e.Value.ToString();
+        category_L2 = long.Parse(str);
+
+        var query = await _categoryRepository.Get();
+        query = query.Where(s => s.CategoryLevel == CategoryLevel.Category_L3).ToList();
+        Categories_L3 = query.Where(x => x.ParentId == category_L2).ToList();
+        Categories_L4.Clear(); category_L4 = 0;
+    }
+    private async Task onChangeCategoryL3(ChangeEventArgs e)
+    {
+        var str = e.Value.ToString();
+        category_L3 = long.Parse(str);
+
+        var query = await _categoryRepository.Get();
+        query = query.Where(s => s.CategoryLevel == CategoryLevel.Category_L4).ToList();
+        Categories_L4 = query.Where(x => x.ParentId == category_L3).ToList();
+    }
+    private Task onChangeCategoryL4(ChangeEventArgs e)
+    {
+        var str = e.Value.ToString();
+        category_L4 = long.Parse(str);
+        return Task.CompletedTask;
+    }
+
+    protected void ColorChanged(List<string> colors)
+    {
+        entity.Colors = colors;
+    }
+
+    protected void ImageChanged(List<string> images)
+    {
+        entity.Images = images;
+    }
+
+    private async Task onChangeStore(long id)
+    {
+        entity.Product.StoreId = id;
+        var store = await _storeRepository.Get(id);
+        entity.Product.CurrencyId = store.CurrencyId;
+    }
+
+    private void ChangeCurrenctHandler(object newValue)
+    {
+        if (newValue != null)
+            entity.Product.CurrencyId = (long)newValue;
+    }
+
+    private async Task onTestSubmit()
+    {
+        if (Categories_L4.Any() && category_L4 != 0)
+        {
+            valid = true;
+            entity.Product.CategoryId = category_L4;
+        }
+        else if (Categories_L3.Any() && category_L3 != 0)
+        {
+            valid = true;
+            entity.Product.CategoryId = category_L3;
+        }
+        else if (Categories_L2.Any() && category_L2 != 0)
+        {
+            valid = true;
+            entity.Product.CategoryId = category_L2;
+        }
+        else if (Categories_L1.Any() && category_L1 != 0)
+        {
+            valid = true;
+            entity.Product.CategoryId = category_L1;
+        }
+        else if (Categories.Any() && category != 0)
+        {
+            valid = true;
+            entity.Product.CategoryId = category;
+        }
+        if (valid == false || entity.Product.MeasruingUnitId == 0)
+            Toaster.Error(@T["Message_Select_err"]);
+
+        //else if ((entity.Product.Quantity3 != 0 && entity.Product.Price3 == 0) || (entity.Product.Quantity2 != 0 && entity.Product.Price2 == 0) || (entity.Product.Quantity1 != 0 && entity.Product.Price1 == 0))
+        //    Toaster.Error(@T["Message_Quantity_err"]);
+
+        else
+            await onValidSubmit.InvokeAsync();
+    }
+}

@@ -1,0 +1,137 @@
+﻿@page "/freezedStores"
+
+@inject IStoreRepository _entityRepository
+
+@attribute [Authorize(Roles = "Admin")]
+
+<h3 style="text-align: center;">@T["NavMenu_FreezedStores"]</h3>
+
+<div class="form-inline">
+    <div class="form-group">
+        <a class="btn btn-success" href="storesadmin">@T["NavMenu_Stores"]</a>
+        &nbsp;&nbsp;&nbsp;
+        <div class="form-group mb-2"><input @onchange="Search" class="form-control" placeholder="@T["Action_Search"]" /></div>
+        <span class="text-muted ml-5">
+            @T["Action_Search_Shwoing"] @entities.Count @T["Action_Search_OutOf"] @totalAmount
+        </span>
+    </div>
+</div>
+
+    <GenericList List="entities">
+        <WholeListTemplate>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>@T["Property_Code"]</th>
+                        <th>@T["Property_Name"]</th>
+                        <th>@T["Property_Country"]</th>
+                        <th>@T["Property_City"]</th>
+                        <th>@T["Property_DefaultCurrency"]</th>
+                        <th>@T["Property_StoreTags"]</th>
+                        <th>@T["Property_Image"]</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in entities)
+                    {
+                        <tr>
+                            <td>
+                                @item.Code
+                            </td>
+                            <td>
+                                @item.Name
+                            </td>
+                            <td>
+                                @_localizationDB.GetName(item.City.Country)
+                            </td>
+                            <td>
+                                @_localizationDB.GetName(item.City)
+                            </td>
+                            <td>
+                                @item.Currency.Code
+                            </td>
+                            <td>
+                                @foreach (var tag in item.StoreTags)
+                                {
+                                    @_localizationDB.GetName(tag.Tag)
+                                    <span>&nbsp;</span>
+                                }
+                            </td>
+                            <td>
+                                <img class="img-fluid img-thumbnail" alt="Store Image" src="@item.Image" style="height:100px; width:100px;" />
+                            </td>
+                            <td>
+                                <button class="btn btn-danger" @onclick="@(() => ShowModal(@item))">@T["Action_UnFreeze"]</button>
+                                <a class="btn btn-info" href="/storeAdmin/details/@item.Id">@T["Action_Details"]</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </WholeListTemplate>
+    </GenericList>
+    <AD.Client.Shared.Pagination CurrentPage="@paginationDTO.Page" SelectedPage="SelectedPage" TotalAmountPages="totalAmountOfPages"></AD.Client.Shared.Pagination>
+
+    @code {
+        [CascadingParameter] public IModalService Modal { get; set; }
+
+        List<Store> entities = new List<Store>();
+
+        PaginationSearchDTO paginationDTO = new PaginationSearchDTO() { RecordsPerPage = 10 };
+        private int totalAmountOfPages;
+        private long totalAmount;
+
+        protected override async Task OnInitializedAsync()
+        {
+            await LoadEntities();
+        }
+
+        private async Task Search(ChangeEventArgs args)
+        {
+            paginationDTO.SearchText = args.Value.ToString();
+            await LoadEntities();
+        }
+
+        private async Task SelectedPage(int page)
+        {
+            paginationDTO.Page = page;
+            await LoadEntities();
+        }
+
+        private async Task LoadEntities()
+        {
+            var paginatedResponse = await _entityRepository.GetAllFreezedStoresAdmin(paginationDTO);
+            entities = paginatedResponse.Response;
+            totalAmountOfPages = paginatedResponse.TotalAmountPages;
+            totalAmount = paginatedResponse.TotalAmount;
+        }
+
+        private async Task ShowModal(Store entity)
+        {
+            var modal = Modal.Show<Confirm>(@T["Modal_Confirm_UnFreeze_Store"]);
+            var result = await modal.Result;
+
+            if (!result.Cancelled && (result.Data is bool accepted) && accepted)
+            {
+                try
+                {
+                    FreezeVMRequest StoreVM = new()
+                    {
+                        Id = entity.Id,
+                        Status = Status.Online,
+                    };
+
+                    await _entityRepository.Freeze_UnFreeze(StoreVM);
+                    await LoadEntities();
+                    Toaster.Success(T["Message_Store_UnFreeze"]);
+                }
+                catch (Exception ex)
+                {
+                    Toaster.Error(T["Message_Error"]);
+                    await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+                }
+            }
+        }
+
+    }

@@ -1,0 +1,9 @@
+﻿<div>
+    <button @onclick="Yes" class="btn btn-success">@T["Modal_Confirm_Yes"]</button>
+    <button @onclick="No" class="btn btn-primary">@T["Modal_Confirm_No"]</button>
+</div>
+
+@code { [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; }
+
+    async Task Yes() => await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+    async Task No() => await BlazoredModal.CancelAsync(); }

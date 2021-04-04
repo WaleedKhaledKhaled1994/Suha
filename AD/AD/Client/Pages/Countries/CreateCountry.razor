@@ -1,0 +1,40 @@
+﻿@page "/country/create"
+
+@inject ICountryRepository _entityRepository
+
+@attribute [Authorize(Roles = "Admin")]
+
+<CountryForm entity="entity" Action="@T["Action_Create"]" onValidSubmit="Create" isBusy="isBusy" />
+
+@code {
+    private Country entity = new Country();
+    bool isBusy = false;
+
+    private async Task Create()
+    {
+        try
+        {
+            isBusy = true;
+            AddCountryVMRequest countryVM = new()
+            {
+                Name_ar = entity.Name_ar,
+                Name_en = entity.Name_en,
+                Name_fr = entity.Name_fr,
+                Name_tr = entity.Name_tr,
+                Name_ru = entity.Name_ru,
+                Image = entity.Image
+            };
+            await _entityRepository.Create(countryVM);
+            Toaster.Success(T["Message_Add"]);
+
+            _navigationManager.NavigateTo("countries");
+        }
+        catch (Exception ex)
+        {
+            isBusy = false;
+
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    }
+}

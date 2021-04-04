@@ -1,0 +1,251 @@
+﻿@page "/myOrders"
+
+@inject IOrderRepository _entityRepository
+@inject IStoreUserRepository _storeUsersRepository
+
+@attribute [Authorize(Roles = "User")]
+
+<h3 style="text-align: center;">@T["NavMenu_MyOrders"]</h3>
+
+<EditForm Model="indexOrderVMRequest">
+    <div class="form-inline">
+        <div class="form-group mb-2"><input @onchange="Search" class="form-control" placeholder="@T["Action_Search"]" /></div>
+        <div class="form-group mx-sm-3 mb-2">
+            <select class="form-control" @bind="indexOrderVMRequest.OrderStatus">
+                <option value="0">
+                    @T["Action_Select"]"
+                </option>
+                @foreach (var item in Enum.GetValues(typeof(OrderStatus)))
+                {
+                    <option value="@item">@item</option>
+                }
+            </select>
+        </div>
+        <label class="sr-only">@T["[Filter_From"]</label>
+        <DateEdit TValue="DateTime?" @bind-Date="@indexOrderVMRequest.From" />
+        <label class="sr-only">@T["[Filter_To"]</label>
+        <DateEdit TValue="DateTime?" @bind-Date="@indexOrderVMRequest.To" />
+        <button type="button" class="btn btn-primary mb-2 mx-sm-3" @onclick="@(()=> LoadEntities())">@T["Action_Filter"]</button>
+        <button type="button" class="btn btn-danger mb-2" @onclick="Clear">@T["Action_Clear"]</button>
+        <span class="text-muted ml-5">
+            @T["Action_Search_Shwoing"] @entities.Count @T["Action_Search_OutOf"] @totalAmount
+        </span>
+    </div>
+</EditForm>
+<br />
+<GenericList List="entities">
+    <WholeListTemplate>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>@T["Property_DateTime"]</th>
+                    <th>@T["Property_Name"]</th>
+                    <th>@T["Property_Quantity"]</th>
+                    <th>@T["Property_Total"]</th>
+                    <th>@T["Property_Store"]</th>
+                    <th>@T["Property_PaymentMethod"]</th>
+                    <th>@T["Property_Status"]</th>
+                    <th>@T["Property_Rating"]</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in entities)
+                {
+                    <tr>
+                        <td>
+                            @item.OrderDate
+                        </td>
+                        <td>
+                            @item.Product.Name
+                        </td>
+                        <td>
+                            @item.Quantity
+                        </td>
+                        <td>
+                            @item.Total
+                        </td>
+                        <td>
+                            @item.Product?.Store?.Name
+                        </td>
+                        <td>
+                            @item.StorePaymentMethod?.PaymentMethod?.Name
+                        </td>
+                        <td>
+                            @item.Status
+                        </td>
+                        <td>
+                            @if (item.Status == OrderStatus.Received)
+                            {
+                                <Rating OrderId="item.Id" MaximumRating="5" SelectedRating="item.Rate" OnVote="OnVote" />
+                            }
+                            else if (item.Status == OrderStatus.InShipping)
+                            {
+                                <input type="button" class="btn btn-success" value="@T["Action_Receive"]" disabled=@isBusy @onclick="@(()=>onReceiveOrder(item))" />
+                            }
+                        </td>
+                        <td>
+                            <a class="btn btn-primary" href="/order/chat/@item.Id">@T["Action_Chat"]</a>
+                            <a class="btn btn-primary" href="/order/details/@item.Id">@T["Action_Details"]</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </WholeListTemplate>
+</GenericList>
+<AD.Client.Shared.Pagination CurrentPage="@indexOrderVMRequest.Page" SelectedPage="SelectedPage" TotalAmountPages="totalAmountOfPages" />
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    List<Order> entities = new List<Order>();
+
+    IndexOrderVMRequest indexOrderVMRequest = new() { RecordsPerPage = 10 };
+
+    private int totalAmountOfPages;
+    private long totalAmount;
+    bool isBusy = false;
+
+    protected InputImage inputImage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var queryStrings = _navigationManager.GetQueryStrings(_navigationManager.Uri);
+        if (queryStrings != null)
+            FillFilterWithQueryStrings(queryStrings);
+        await LoadEntities();
+    }
+
+    private async Task Search(ChangeEventArgs args)
+    {
+        indexOrderVMRequest.SearchText = args.Value.ToString();
+        await LoadEntities();
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        indexOrderVMRequest.Page = page;
+        await LoadEntities();
+    }
+
+    private async Task LoadEntities()
+    {
+        var queryString = GenerateQueryString();
+        if (!string.IsNullOrWhiteSpace(queryString))
+        {
+            queryString = $"?{queryString}";
+            _navigationManager.NavigateTo("/myOrders" + queryString);
+        }
+        var paginatedResponse = await _entityRepository.GetUserOrders(indexOrderVMRequest);
+        entities = paginatedResponse.Response;
+        totalAmountOfPages = paginatedResponse.TotalAmountPages;
+        totalAmount = paginatedResponse.TotalAmount;
+    }
+
+    private async Task OnVote(OrderRateVMRequest orderRate)
+    {
+        try
+        {
+            await _entityRepository.EditRate(orderRate);
+            await LoadEntities();
+            Toaster.Success(T["Message_Rate"]);
+        }
+        catch (Exception ex)
+        {
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    }
+
+    private async Task onReceiveOrder(Order entity)
+    {
+        try
+        {
+            isBusy = true;
+            var title = T["Event_Order_Closed"];
+            var body = $"{entity.Product.Name}/ {entity.Quantity.ToString()}/ {OrderStatus.Received}";
+            var type = NotificationType.OrderClosed;
+            List<long> userCIds = new();
+
+            var employees = await _storeUsersRepository.GetCurrentStoreUsersByStore(entity.Product.StoreId);
+
+            foreach (var item in employees)
+                if (item.ManageProducts)
+                    userCIds.Add(item.StoreUser.UserCId);
+
+            AddNotificationVMRequest addNotificationVM = new AddNotificationVMRequest()
+            {
+                Title = title,
+                Body = body,
+                Type = type,
+                UserCIds = userCIds,
+                Link = "/Orders"
+            };
+
+            EditOrderVMRequest orderVM = new()
+            {
+                Id = entity.Id,
+                Status = OrderStatus.Received,
+                AddNotificationVM = addNotificationVM
+            };
+
+            await _entityRepository.Edit(orderVM);
+            await LoadEntities();
+            Toaster.Success(T["Message_RoleUpdated"]);
+        }
+        catch (Exception ex)
+        {
+            isBusy = false;
+
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    }
+
+    private void FillFilterWithQueryStrings(Dictionary<string, string> queryStrings)
+    {
+        if (queryStrings.ContainsKey("orderStatus"))
+            indexOrderVMRequest.OrderStatus = (OrderStatus)int.Parse(queryStrings["orderStatus"]);
+
+        if (queryStrings.ContainsKey("searchText"))
+            indexOrderVMRequest.SearchText = queryStrings["searchText"];
+
+        if (queryStrings.ContainsKey("from"))
+            indexOrderVMRequest.From = DateTime.Parse(queryStrings["from"]);
+
+        if (queryStrings.ContainsKey("to"))
+            indexOrderVMRequest.To = DateTime.Parse(queryStrings["to"]);
+
+        if (queryStrings.ContainsKey("page"))
+            indexOrderVMRequest.Page = int.Parse(queryStrings["page"]);
+    }
+
+    private string GenerateQueryString()
+    {
+        var queryStringsDict = new Dictionary<string, string>();
+        queryStringsDict["orderStatus"] = indexOrderVMRequest.OrderStatus.ToString();
+        queryStringsDict["searchText"] = indexOrderVMRequest.SearchText;
+        queryStringsDict["from"] = indexOrderVMRequest.From.ToString();
+        queryStringsDict["to"] = indexOrderVMRequest.To.ToString();
+        queryStringsDict["page"] = indexOrderVMRequest.Page.ToString();
+
+        var defaultValue = new List<string>() { "false", "", "0" };
+
+        // genreId=4&title=spider....
+
+        return string.Join("&", queryStringsDict
+            .Where(x => !defaultValue.Contains(x.Value.ToLower()))
+            .Select(x => $"{x.Key}={System.Web.HttpUtility.UrlEncode(x.Value)}").ToArray());
+    }
+
+    private async Task Clear()
+    {
+        indexOrderVMRequest.SearchText = "";
+        indexOrderVMRequest.OrderStatus = null;
+        indexOrderVMRequest.From = null;
+        indexOrderVMRequest.To = null;
+        await LoadEntities();
+    }
+}
+

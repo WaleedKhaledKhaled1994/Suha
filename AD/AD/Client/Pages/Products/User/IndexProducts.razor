@@ -1,0 +1,115 @@
+﻿@page "/Products"
+
+@inject IProductRepository _entityRepository
+
+@attribute [Authorize(Roles = "User")]
+
+<h3 style="text-align: center;">@T["NavMenu_Products"]</h3>
+
+<div class="form-inline">
+    <div class="form-group">
+        <div class="form-group mb-2"><input @onchange="Search" class="form-control" placeholder="@T["Action_Search"]" /></div>
+        <span class="text-muted ml-5">
+            @T["Action_Search_Shwoing"] @entities.Count @T["Action_Search_OutOf"] @totalAmount
+        </span>
+    </div>
+</div>
+
+<GenericList List="entities">
+    <WholeListTemplate>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>@T["Property_Name"]</th>
+                    <th>@T["Property_Price"]</th>
+                    <th>@T["Property_Category"]</th>
+                    <th>@T["Property_Store"]</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in entities)
+                {
+                    <tr>
+                        <td>
+                            @item.Product.Name
+                        </td>
+                        <td>
+                            @item.Product.Price @item.Product.Currency.Code (@item.PriceUser @item.UserCurrency.Code)
+                        </td>
+                        <td>
+                            @_localizationDB.GetName(item.Product.Category)
+                        </td>
+                        <td>
+                            @item.Product.Store.Name
+                        </td>
+                        <td>
+                            <a class="btn btn-primary" href="/product/details/@item.Product.Id">@T["Action_Details"]</a>
+                            <button class="btn btn-success" @onclick="@(() => ShowModalAddToCart(@item.Product))">@T["Action_AddToCart"]</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </WholeListTemplate>
+</GenericList>
+<AD.Client.Shared.Pagination CurrentPage="@paginationDTO.Page" SelectedPage="SelectedPage" TotalAmountPages="totalAmountOfPages"></AD.Client.Shared.Pagination>
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    List<ProductUserDTO> entities = new List<ProductUserDTO>();
+    List<EmployeeRole> roles = new();
+
+    PaginationSearchDTO paginationDTO = new PaginationSearchDTO() { RecordsPerPage = 10 };
+    private int totalAmountOfPages;
+    private long totalAmount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEntities();
+    }
+
+    private async Task Search(ChangeEventArgs args)
+    {
+        paginationDTO.SearchText = args.Value.ToString();
+        await LoadEntities();
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        paginationDTO.Page = page;
+        await LoadEntities();
+    }
+
+    private async Task LoadEntities()
+    {
+        var paginatedResponse = await _entityRepository.GetIndexProductUser(paginationDTO);
+        entities = paginatedResponse.Response;
+        totalAmountOfPages = paginatedResponse.TotalAmountPages;
+        totalAmount = paginatedResponse.TotalAmount;
+    }
+
+    private async Task ShowModalAddToCart(Product product)
+    {
+        var parameters = new ModalParameters();
+        ProductDetailsUserDTO productVM = await _entityRepository.GetProductForUser(product.Id);
+        parameters.Add(nameof(ModalAddProduct.entity), productVM);
+        var options = new ModalOptions { ContentScrollable = true };
+        var modal = Modal.Show<ModalAddProduct>(T["Message_Add_Product_To_Cart"], parameters, options);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                Toaster.Success(T["Message_Add"]);
+            }
+            catch (Exception ex)
+            {
+                Toaster.Error(T["Message_Error"]);
+                await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+            }
+        }
+    }
+}

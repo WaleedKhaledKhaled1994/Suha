@@ -1,0 +1,140 @@
+﻿@page "/productAdmin/details/{entityId:long}"
+
+@inject IProductRepository _entityRepository
+
+@attribute [Authorize(Roles = "Admin")]
+
+@if (entity != null)
+{
+    <div class="page-content-wrapper">
+        <div class="container">
+            <div class="profile-wrapper-area py-3">
+                <div class="card user-info-card">
+                    <div class="card-body p-4 d-flex align-items-center">
+                        <div class="user-info">
+                            <h3>@T["Action_Details"]</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card user-data-card">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Code"]:</label>
+                            <div>
+                                <span>@entity.Product.Code</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Category"]:</label>
+                            <div>
+                                @foreach (var item in entity.UpperCategories)
+                                {
+                                    <span>
+                                        @_localizationDB.GetName(item),
+                                    </span>
+                                }
+                                <span>
+                                    @_localizationDB.GetName(entity.Product.Category)
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Name"]:</label>
+                            <div>
+                                <span>@entity.Product.Name</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Description"]:</label>
+                            <div>
+                                <span>@entity.Product.Description</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_MinValue"]:</label>
+                            <div>
+                                <span>@entity.Product.MinValue</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Colors"]:</label>
+                            <div>
+                                @foreach (var item in entity.Colors)
+                                {
+                                    <div style="width:100px;height:50px;background-color:@item">@item</div>
+                                }
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Price"]:</label>
+                            <div>
+                                <span>@entity.Product.Price @entity.Product.Currency?.Code</span>
+                            </div>
+                        </div>
+                        @if (@entity.Product.Quantity1 != null)
+                        {
+                            <div class="form-group">
+                                <label class="font-weight-bolder">@T["Property_Quantity1"]: @T["Property_Price1"]:</label>
+                                <div>
+                                    <span style="font-weight:400">(@entity.Product.Quantity1 @_localizationDB.GetName(@entity.Product.MeasruingUnit)):</span><span> @entity.Product.Price1 @entity.Product.Currency?.Code</span>
+
+                                </div>
+                            </div>
+                        }
+                        @if (@entity.Product.Quantity2 != null)
+                        {
+                            <div class="form-group">
+                                <label class="font-weight-bolder">@T["Property_Quantity2"]: @T["Property_Price2"]:</label>
+                                <div>
+                                    <span style="font-weight:400">(@entity.Product.Quantity2 @_localizationDB.GetName(@entity.Product.MeasruingUnit)):</span><span> @entity.Product.Price2 @entity.Product.Currency?.Code</span>
+                                </div>
+                            </div>}
+                        @if (@entity.Product.Quantity3 != null)
+                        {
+                            <div class="form-group">
+                                <label class="font-weight-bolder">@T["Property_Quantity3"]: @T["Property_Price3"]:</label>
+                                <div>
+                                    <span style="font-weight:400">(@entity.Product.Quantity3 @_localizationDB.GetName(@entity.Product.MeasruingUnit)):</span><span> @entity.Product.Price3 @entity.Product.Currency?.Code</span>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Note"]:</label>
+                            <div>
+                                <span>@entity.Product.Note</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Images"]:</label>
+                            <div>
+                                @foreach (var item in entity.Images)
+                                {
+                                    <img class="img-fluid img-thumbnail" alt="Product Image" src="@item" style="height:200px; width:200px;" />
+                                }
+                            </div>
+                        </div>
+                        <a class="btn btn-primary" href="productsAdmin">@T["Action_Back_To_List"]</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+    public ProductDetailsDTO entity;
+    [Parameter] public long entityId { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        entity = await _entityRepository.Get(entityId);
+
+        if (entity == null)
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+    }
+}

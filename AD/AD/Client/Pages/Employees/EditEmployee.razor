@@ -1,0 +1,151 @@
+﻿@page "/employee/edit/{storeUserId:long}"
+
+@inject IStoreUserRepository _entityRepository
+
+@attribute [Authorize(Roles = "User")]
+
+<div class="page-content-wrapper">
+    <div class="container">
+        <div class="profile-wrapper-area py-3">
+            <div class="card user-info-card">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="user-info">
+                        <h3>@T["Action_Edit"] @T["Class_Employee"]</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="card user-data-card">
+                <div class="card-body">
+                    <EditForm Model="entity" OnValidSubmit="Save">
+                        <DataAnnotationsValidator />
+                        <div class="form-group">
+                            <label>@T["Admin"]:</label>
+                            <div>
+                                <input type="checkbox" checked=@entity.Admin
+                                       @onchange="eventArgs => { ChangeAdminHandler(eventArgs.Value); }" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Permission_ManageProducts"]:</label>
+                            <div>
+                                <input type="checkbox" checked=@entity.ManageProducts
+                                       @onchange="eventArgs => { ChangeManageProductsHandler(eventArgs.Value); }" />
+                                <ValidationMessage For="@(() => entity.ManageProducts)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Permission_ManageOrders"]:</label>
+                            <div>
+                                <input type="checkbox" checked=@entity.ManageOrders
+                                       @onchange="eventArgs => { ChangeManageOrdersHandler(eventArgs.Value); }" />
+                                <ValidationMessage For="@(() => entity.ManageOrders)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Permission_ManageComments"]:</label>
+                            <div>
+                                <input type="checkbox" checked=@entity.ManageComments
+                                       @onchange="eventArgs => { ChangeManageCommentsHandler(eventArgs.Value); }" />
+                                <ValidationMessage For="@(() => entity.ManageComments)" />
+                            </div>
+                        </div>
+                        <button class="btn btn-success" disabled=@isBusy type="submit">@T["Action_Save"]</button>
+                        <a class="btn btn-primary" href="/employees/@entity.StoreUser?.StoreId">@T["Action_Back_To_List"]</a>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code
+{ [Parameter] public long storeUserId { get; set; }
+    private EmployeeDTO entity = new EmployeeDTO();
+    bool isBusy = false;
+    protected override async Task OnInitializedAsync()
+    {
+        entity = await _entityRepository.GetStoreUser(storeUserId);
+
+        if (entity == null)
+            _navigationManager.NavigateTo("NotFound");
+
+        var userRoles = await _roleRepository.GetRolesForStore(entity.StoreUser.StoreId);
+        if (!userRoles.Contains(EmployeeRole.Admin))
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+    }
+
+    private void ChangeAdminHandler(object args)
+    {
+        if (args.ToString() == "True")
+        {
+            entity.Admin = true;
+            entity.ManageProducts = true;
+            entity.ManageOrders = true;
+            entity.ManageComments = true;
+        }
+        else if (args.ToString() == "False")
+        {
+            entity.Admin = false;
+        }
+    }
+
+    private void ChangeManageProductsHandler(object args)
+    {
+        if (args.ToString() == "True")
+        {
+            entity.ManageProducts = true;
+        }
+        else if (args.ToString() == "False")
+        {
+            entity.Admin = false;
+            entity.ManageProducts = false;
+        }
+    }
+
+    private void ChangeManageOrdersHandler(object args)
+    {
+        if (args.ToString() == "True")
+        {
+            entity.ManageOrders = true;
+        }
+        else if (args.ToString() == "False")
+        {
+            entity.Admin = false;
+            entity.ManageOrders = false;
+        }
+    }
+
+    private void ChangeManageCommentsHandler(object args)
+    {
+        if (args.ToString() == "True")
+        {
+            entity.ManageComments = true;
+        }
+        else if (args.ToString() == "False")
+        {
+            entity.Admin = false;
+            entity.ManageComments = false;
+        }
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            isBusy = true;
+
+            await _entityRepository.Edit(entity);
+            _navigationManager.NavigateTo($"/employees/{entity.StoreUser?.StoreId}");
+            Toaster.Success(T["Message_RoleUpdated"]);
+        }
+        catch (Exception ex)
+        {
+            isBusy = false;
+
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    } }

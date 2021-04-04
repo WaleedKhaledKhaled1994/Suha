@@ -1,0 +1,138 @@
+﻿@page "/categoryAdmin/details/{entityId:long}"
+
+@using AD.Shared.DTOs.Category
+
+@inject ICategoryRepository _entityRepository
+@inject IFavouriteRepository _favouriteRepository
+
+@attribute [Authorize(Roles = "Admin")]
+
+@if (entity != null)
+{
+    <div class="panel panel-default">
+        <div class="panel-heading"><h2>@_localizationDB.GetName(entity.Category)</h2></div>
+        <div class="row panel-body" style="padding-left:40px;">
+            <h4>@_localizationDB.GetDescription(entity)</h4>
+
+            @foreach (var item in entity.ChildCategories)
+            {
+                <div class="col-md-3 thumbnail" style="height:280px; width:250px; margin:10px;">
+                    <img src="@item.Image" style="height:175px; width:200px;" />
+                    <h3 style="text-align:center">@_localizationDB.GetName(item)</h3>
+                    <input type="button" class="btn btn-info" @onclick="()=>Load(item.Id)" value="@T["Action_Details"]" />
+                    @*<AuthorizeView Roles="User">
+                            @if (item.Status == FollowStatus.UnFollow)
+                            {
+                                <button class="btn btn-primary" @onclick="@(() => Follow_UnFollow(@item.Category.Id, FollowStatus.Follow))">@T["Action_Follow"]</button>
+                            }
+                            @if (item.Status == FollowStatus.Follow)
+                            {
+                                <button class="btn btn-danger" @onclick="@(() => Follow_UnFollow(@item.Category.Id, FollowStatus.UnFollow))">@T["Action_UnFollow"]</button>
+                            }
+                        </AuthorizeView>*@
+                    <AuthorizeView Roles="Admin">
+                        <a class="btn btn-success" href="/category/edit/@item.Id">@T["Action_Edit"]</a>
+                        <button class="btn btn-warning" @onclick="@(() => ShowModalFreeze(@item.Id))">@T["Action_Freeze"]</button>
+                        <button class="btn btn-danger" @onclick="@(() => ShowModal(@item.Id))">@T["Action_Delete"]</button>
+                    </AuthorizeView>
+                </div>
+            }
+        </div>
+    </div>
+    <a class="btn btn-info" href="categories">@T["Action_Back_To_List"]</a>
+}
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    public CategoryDTO entity;
+    [Parameter] public long entityId { get; set; }
+
+    private bool showFollow = false;
+    private bool showUnFollow = false;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Load(entityId);
+    }
+
+    private async Task Load(long entityId)
+    {
+        entity = await _entityRepository.Get(entityId);
+
+        if (entity == null)
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+
+        if (entity.ChildCategories.Count == 0)
+            _navigationManager.NavigateTo($"categoryProducts/{entityId}");
+    }
+
+    private async Task ShowModalFreeze(long id)
+    {
+        var modal = Modal.Show<ConfirmDelete>(@T["Modal_Confirm_Freeze_Category"]);
+
+        var result = await modal.Result;
+
+        if (!result.Cancelled && (result.Data is bool accepted) && accepted)
+        {
+            try
+            {
+                FreezeVMRequest categoryVM = new()
+                {
+                    Id = id,
+                    Status = Status.Offline,
+                };
+                await _entityRepository.Freeze_UnFreeze(categoryVM);
+                _navigationManager.NavigateTo($"freezedCategories");
+                Toaster.Success(T["Message_Category_Freeze"]);
+            }
+            catch (Exception ex)
+            {
+                Toaster.Error(T["Message_Error"]);
+                await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+            }
+        }
+    }
+
+    private async Task Follow_UnFollow(long id, FollowStatus status)
+    {
+        try
+        {
+            await _favouriteRepository.Follow_UnFollow_Category(new CategoryFollowers { CategoryId = id, Status = status });
+            await Load(entityId);
+            if (status == FollowStatus.Follow)
+                Toaster.Success(T["Message_Follow"]);
+            else
+                Toaster.Warning(T["Message_UnFollow"]);
+        }
+        catch (Exception ex)
+        {
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    }
+
+    private async Task ShowModal(long id)
+    {
+        var modal = Modal.Show<ConfirmDelete>(@T["Modal_Confirm_Delete"]);
+        var result = await modal.Result;
+
+        if (!result.Cancelled && (result.Data is bool accepted) && accepted)
+        {
+            try
+            {
+                await _entityRepository.Delete(id);
+                _navigationManager.NavigateTo($"categoriesAdmin");
+                Toaster.Error(T["Message_Delete"]);
+            }
+            catch (Exception ex)
+            {
+                Toaster.Error(T["Message_Error"]);
+                await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+            }
+        }
+    }
+}

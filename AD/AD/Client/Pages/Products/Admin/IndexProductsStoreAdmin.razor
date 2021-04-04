@@ -1,0 +1,124 @@
+﻿@page "/storeProductsAdmin/{storeId:long}"
+
+@inject IProductRepository _entityRepository
+
+@attribute [Authorize(Roles = "Admin")]
+
+<h3 style="text-align: center;">@T["NavMenu_StoreProducts"]</h3>
+
+<div class="form-inline">
+    <div class="form-group">
+        <a class="btn btn-info" href="freezedProducts">@T["NavMenu_FreezedProducts"]</a>
+        &nbsp;&nbsp;&nbsp;
+        <div class="form-group mb-2"><input @onchange="Search" class="form-control" placeholder="@T["Action_Search"]" /></div>
+        <span class="text-muted ml-5">
+            @T["Action_Search_Shwoing"] @entities.Count @T["Action_Search_OutOf"] @totalAmount
+        </span>
+    </div>
+</div>
+
+<GenericList List="entities">
+    <WholeListTemplate>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>@T["Property_Code"]</th>
+                    <th>@T["Property_Name"]</th>
+                    <th>@T["Property_Price"]</th>
+                    <th>@T["Property_Category"]</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in entities)
+                {
+                    <tr>
+                        <td>
+                            @item.Product.Code
+                        </td>
+                        <td>
+                            @item.Product.Name
+                        </td>
+                        <td>
+                            @item.Product.Price
+                        </td>
+                        <td>
+                            @_localizationDB.GetName(item.Product?.Category)
+                        </td>
+                        <td>
+                            <a class="btn btn-primary" href="/productAdmin/details/@item.Product.Id">@T["Action_Details"]</a>
+                            <button class="btn btn-danger" @onclick="@(() => ShowModalFreeze(@item.Product.Id))">@T["Action_Freeze"]</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </WholeListTemplate>
+</GenericList>
+<AD.Client.Shared.Pagination CurrentPage="@paginationDTO.Page" SelectedPage="SelectedPage" TotalAmountPages="totalAmountOfPages"></AD.Client.Shared.Pagination>
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+    [Parameter] public long storeId { get; set; }
+    List<EmployeeRole> roles = new();
+
+    List<ProductDetailsDTO> entities = new List<ProductDetailsDTO>();
+
+    PaginationSearchDTO paginationDTO = new PaginationSearchDTO() { RecordsPerPage = 10 };
+    private int totalAmountOfPages;
+    private long totalAmount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        roles = await _roleRepository.GetRolesForStore(storeId);
+
+        await LoadEntities();
+    }
+
+    private async Task Search(ChangeEventArgs args)
+    {
+        paginationDTO.SearchText = args.Value.ToString();
+        await LoadEntities();
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        paginationDTO.Page = page;
+        await LoadEntities();
+    }
+
+    private async Task LoadEntities()
+    {
+        var paginatedResponse = await _entityRepository.GetProductsByStore(paginationDTO, storeId);
+        entities = paginatedResponse.Response;
+        totalAmountOfPages = paginatedResponse.TotalAmountPages;
+        totalAmount = paginatedResponse.TotalAmount;
+    }
+
+    private async Task ShowModalFreeze(long id)
+    {
+        var modal = Modal.Show<ConfirmDelete>(@T["Modal_Confirm_Freeze_Product"]);
+
+        var result = await modal.Result;
+
+        if (!result.Cancelled && (result.Data is bool accepted) && accepted)
+        {
+            try
+            {
+                FreezeVMRequest categoryVM = new()
+                {
+                    Id = id,
+                    Status = Status.Offline,
+                };
+                await _entityRepository.Freeze_UnFreeze(categoryVM);
+                await LoadEntities();
+                Toaster.Success(T["Message_Freeze_Successful"]);
+            }
+            catch (Exception ex)
+            {
+                Toaster.Error(T["Message_Error"]);
+                await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+            }
+        }
+    }
+}

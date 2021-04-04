@@ -1,0 +1,102 @@
+﻿@page "/audits"
+
+@inject IAuditRepository _entityRepository
+
+@attribute [Authorize(Roles = "Admin")]
+
+<h3 style="text-align: center;">@T["NavMenu_Audits"]</h3>
+
+<div class="form-inline">
+    <div class="form-group">
+        @*<a class="btn btn-info" href="audit/create">@T["Action_Create"] @T["Class_Audit"]</a>
+            &nbsp;&nbsp;&nbsp;*@
+        <div class="form-group mb-2"><input @onchange="Search" class="form-control" placeholder="@T["Action_Search"]" /></div>
+        <span class="text-muted ml-5">
+            @T["Action_Search_Shwoing"] @entities.Count @T["Action_Search_OutOf"] @totalAmount
+        </span>
+    </div>
+</div>
+
+    <GenericList List="entities">
+        <WholeListTemplate>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>@T["Property_User"]</th>
+                        <th>@T["Property_ActionType"]</th>
+                        <th>@T["Property_TableName"]</th>
+                        <th>@T["Property_DateTime"]</th>
+                        <th>@T["Property_OldValues"]</th>
+                        <th>@T["Property_NewValues"]</th>
+                        <th>@T["Property_AffectedColumns"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in entities)
+                    {
+                        <tr>
+                            <td>
+                                @if (@item.UserId == null)
+                                {
+                                    <span>Anonymous</span>
+                                }
+                                @item.UserId
+                            </td>
+                            <td>
+                                @item.Type
+                            </td>
+                            <td>
+                                @item.TableName
+                            </td>
+                            <td>
+                                @item.DateTime.ToString()
+                            </td>
+                            <td>
+                                @item.OldValues
+                            </td>
+                            <td>
+                                @item.NewValues
+                            </td>
+                            <td>
+                                @item.AffectedColumns
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </WholeListTemplate>
+    </GenericList>
+    <AD.Client.Shared.Pagination CurrentPage="@paginationDTO.Page" SelectedPage="SelectedPage" TotalAmountPages="totalAmountOfPages" />
+
+    @code {
+        List<Audit> entities = new List<Audit>();
+
+        PaginationSearchDTO paginationDTO = new PaginationSearchDTO() { RecordsPerPage = 10 };
+        private int totalAmountOfPages;
+        private long totalAmount;
+
+        protected override async Task OnInitializedAsync()
+        {
+            await LoadEntities();
+        }
+
+        private async Task Search(ChangeEventArgs args)
+        {
+            paginationDTO.SearchText = args.Value.ToString();
+            await LoadEntities();
+        }
+
+        private async Task SelectedPage(int page)
+        {
+            paginationDTO.Page = page;
+            await LoadEntities();
+        }
+
+        private async Task LoadEntities()
+        {
+            var paginatedResponse = await _entityRepository.Get(paginationDTO);
+            entities = paginatedResponse.Response;
+            totalAmountOfPages = paginatedResponse.TotalAmountPages;
+            totalAmount = paginatedResponse.TotalAmount;
+        }
+    }

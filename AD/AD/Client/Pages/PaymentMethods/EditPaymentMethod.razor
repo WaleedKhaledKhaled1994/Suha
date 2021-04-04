@@ -1,0 +1,48 @@
+﻿@page "/paymentMethod/edit/{entityId:long}"
+
+@inject IPaymentMethodRepository _entityRepository
+
+@attribute [Authorize(Roles = "Admin")]
+
+@if (entity != null)
+{
+    <PaymentMethodForm entity="entity" Action="@T["Action_Edit"]" onValidSubmit="Edit" isBusy="isBusy" />
+}
+@code {
+    [Parameter] public long entityId { get; set; }
+    bool isBusy = false;
+    public PaymentMethod entity;
+    protected async override Task OnInitializedAsync()
+    {
+        entity = await _entityRepository.Get(entityId);
+
+        if (entity == null)
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+    }
+
+    private async Task Edit()
+    {
+        try
+        {
+            isBusy = true;
+            EditPaymentMethodVMRequest paymentMethodVM = new()
+            {
+                Id = entity.Id,
+                Name = entity.Name
+            };
+            await _entityRepository.Edit(paymentMethodVM);
+            _navigationManager.NavigateTo("paymentMethods");
+            Toaster.Info(T["Message_Update"]);
+        }
+        catch (Exception ex)
+        {
+            isBusy = false;
+
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    }
+}

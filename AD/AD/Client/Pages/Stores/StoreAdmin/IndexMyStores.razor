@@ -1,0 +1,159 @@
+﻿@page "/myStores"
+
+@inject IStoreRepository _entityRepository
+
+@attribute [Authorize(Roles = "User")]
+
+<h3 style="text-align: center;">@T["NavMenu_MyStores"]</h3>
+
+<div class="form-inline">
+    <div class="form-group">
+        <a class="btn btn-info" href="store/create">@T["Action_Create"] @T["Class_Store"]</a>
+        &nbsp;&nbsp;&nbsp;
+        <a class="btn btn-warning" href="RequestAdminStores">@T["NavMenu_RequestAdminStores"]</a>
+        &nbsp;&nbsp;&nbsp;
+        <div class="form-group mb-2"><input @onchange="Search" class="form-control" placeholder="@T["Action_Search"]" /></div>
+        <span class="text-muted ml-5">
+            @T["Action_Search_Shwoing"] @entities.Count @T["Action_Search_OutOf"] @totalAmount
+        </span>
+    </div>
+</div>
+
+<GenericList List="entities">
+    <WholeListTemplate>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>@T["Property_Name"]</th>
+                    <th>@T["Property_StoreTags"]</th>
+                    <th>@T["Property_Image"]</th>
+                    <th>@T["Property_Permissions"]</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in entities)
+                {
+                    <tr>
+                        <td>
+                            @item.Store.Name
+                        </td>
+                        <td>
+                            @foreach (var tag in item.Store?.StoreTags)
+                            {
+                                <span>(</span>@_localizationDB.GetName(tag.Tag)<span>)</span>
+                                <span>&nbsp;</span>
+                            }
+                        </td>
+                        <td>
+                            <img class="img-fluid img-thumbnail" alt="Store Image" src="@item.Store.Image" style="height:100px; width:100px;" />
+                        </td>
+                        <td>
+                            @if (item.Admin == true)
+                            {
+                                <p>@T["Permission_Admin"]</p>
+                            }
+                            else
+                            {
+
+                                if (item.ManageProducts)
+                                {
+                                    <p>@T["Permission_ManageProducts"]</p>
+                                }
+                                if (item.ManageOrders)
+                                {
+                                    <p>@T["Permission_ManageOrders"]</p>
+                                }
+                                if (item.ManageComments)
+                                {
+                                    <p>@T["Permission_ManageComments"]</p>
+                                }
+                            }
+                        </td>
+                        <td>
+                            <a class="btn btn-info" href="/store/details/@item.Store.Id">@T["Action_Details"]</a>
+                            <span>&nbsp;</span>
+                            @if (item.Admin)
+                            {
+                                <a class="btn btn-dark" href="/employees/@item.Store.Id">@T["NavMenu_Employees"]</a>
+                                <span>&nbsp;</span>
+                                <a class="btn btn-success" href="/store/edit/@item.Store.Id">@T["Action_Edit"]</a>
+                                <span>&nbsp;</span>
+                                <button class="btn btn-danger" @onclick="@(() => ShowModal(@item.Store.Id))">@T["Action_Delete"]</button>
+                                <span>&nbsp;</span>
+                            }
+                            @if (item.ManageProducts)
+                            {
+                                <a class="btn btn-dark" href="/storeProducts/@item.Store.Id">@T["NavMenu_Products"]</a>
+                                <span>&nbsp;</span>
+                            }
+                            @if (item.ManageOrders)
+                            {
+                                <a class="btn btn-dark" href="/storeOrders/@item.Store.Id">@T["NavMenu_Orders"]</a>
+                                <span>&nbsp;</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </WholeListTemplate>
+</GenericList>
+
+<AD.Client.Shared.Pagination CurrentPage="@paginationDTO.Page" SelectedPage="SelectedPage" TotalAmountPages="totalAmountOfPages"></AD.Client.Shared.Pagination>
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    List<AD.Shared.DTOs.Store.IndexMyStores> entities = new();
+
+    PaginationSearchDTO paginationDTO = new PaginationSearchDTO() { RecordsPerPage = 10 };
+    private int totalAmountOfPages;
+    private long totalAmount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEntities();
+    }
+
+    private async Task Search(ChangeEventArgs args)
+    {
+        paginationDTO.SearchText = args.Value.ToString();
+        await LoadEntities();
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        paginationDTO.Page = page;
+        await LoadEntities();
+    }
+
+    private async Task LoadEntities()
+    {
+        var paginatedResponse = await _entityRepository.GetMyStores(paginationDTO);
+        entities = paginatedResponse.Response;
+        totalAmountOfPages = paginatedResponse.TotalAmountPages;
+        totalAmount = paginatedResponse.TotalAmount;
+    }
+
+    private async Task ShowModal(long id)
+    {
+        var modal = Modal.Show<ConfirmDelete>(@T["Modal_Confirm_Delete"]);
+        var result = await modal.Result;
+
+        if (!result.Cancelled && (result.Data is bool accepted) && accepted)
+        {
+            try
+            {
+                await _entityRepository.Delete(id);
+                await LoadEntities();
+                Toaster.Error(T["Message_Delete"]);
+            }
+            catch (Exception ex)
+            {
+                Toaster.Error(T["Message_Error"]);
+                await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+            }
+        }
+    }
+}

@@ -1,0 +1,62 @@
+﻿@page "/store/{storeId:long}/product/create"
+
+@inject IProductRepository _entityRepository
+
+@attribute [Authorize(Roles = "User")]
+
+<ProductForm entity="entity" Action="@T["Action_Create"]" onValidSubmit="Create" storeId="storeId" />
+
+@code {
+    [Parameter] public long storeId { get; set; }
+    private AddProductVMRequest entity = new AddProductVMRequest();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userRoles = await _roleRepository.GetRolesForStore(storeId);
+
+        if (!userRoles.Contains(EmployeeRole.ManageProducts))
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+    }
+
+    private async Task Create()
+    {
+        try
+        {
+            AddProductVMRequest productVM = new AddProductVMRequest()
+            {
+                Colors = entity.Colors,
+                Images = entity.Images,
+
+                CodeStore = entity.CodeStore,
+                Brand = entity.Brand,
+                Name = entity.Name,
+                Description = entity.Description,
+                MeasruingUnitId = entity.MeasruingUnitId,
+                MinValue = entity.MinValue,
+                Price = entity.Price,
+                Quantity1 = entity.Quantity1,
+                Price1 = entity.Price1,
+                Quantity2 = entity.Quantity2,
+                Price2 = entity.Price2,
+                Quantity3 = entity.Quantity3,
+                Price3 = entity.Price3,
+                CategoryId = entity.CategoryId,
+                Note = entity.Note,
+                StoreId = entity.StoreId,
+                CurrencyId = entity.CurrencyId
+            };
+            await _entityRepository.Create(productVM);
+            Toaster.Success(T["Message_Add"]);
+            _navigationManager.NavigateTo($"storeProducts/{entity.StoreId}");
+            return;
+        }
+        catch (Exception ex)
+        {
+            Toaster.Error(T["Message_Error"]);
+            await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+        }
+    }
+}

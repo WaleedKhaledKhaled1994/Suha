@@ -1,0 +1,135 @@
+﻿@page "/employees/{storeId:long}"
+
+@inject IStoreUserRepository _entityRepository
+    
+@attribute [Authorize(Roles = "User")]
+
+<h3 style="text-align: center;">@T["Employees"]</h3>
+
+<div class="form-inline">
+    <div class="form-group">
+        <a class="btn btn-info" href="store/@storeId/employee/add">@T["Action_Add"] @T["Class_Employee"]</a>
+        &nbsp;&nbsp;&nbsp;
+        <div class="form-group mb-2"><input @onchange="Search" class="form-control" placeholder="@T["Action_Search"]" /></div>
+        <span class="text-muted ml-5">
+            @T["Action_Search_Shwoing"] @entities.Count @T["Action_Search_OutOf"] @totalAmount
+        </span>
+    </div>
+</div>
+
+<GenericList List="entities">
+    <WholeListTemplate>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>@T["Property_Name"]</th>
+                    <th>@T["Property_Roles"]</th>
+                    <th>@T["Property_Status"]</th>
+                    <th>@T["Property_Permissions"]</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in entities)
+                {
+                    <tr>
+                        <td>
+                            @item.StoreUser.User.UserName
+                        </td>
+                        <td>
+                            @if (item.Admin == true)
+                            {
+                                <p>@T["Permission_Admin"]</p>
+                            }
+                            else
+                            {
+                                if (item.ManageComments == true)
+                                {
+                                    <p>@T["Permission_ManageComments"]</p>
+                                }
+                                if (item.ManageOrders == true)
+                                {
+                                    <p>@T["Permission_ManageOrders"]</p>
+                                }
+                                if (item.ManageProducts == true)
+                                {
+                                    <p>@T["Permission_ManageProducts"]</p>
+                                }
+                            }
+                        </td>
+                        <td>
+                            @item.StoreUser.Status
+                        </td>
+                        <td>
+                            <a class="btn btn-success" href="/employee/edit/@item.StoreUser.Id">@T["Action_Edit"]</a>
+                            <button class="btn btn-danger" @onclick="@(() => ShowModal(@item.StoreUser.Id))">@T["Action_Delete"]</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </WholeListTemplate>
+</GenericList>
+<AD.Client.Shared.Pagination CurrentPage="@paginationDTO.Page" SelectedPage="SelectedPage" TotalAmountPages="totalAmountOfPages" />
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    [Parameter] public long storeId { get; set; }
+
+    List<EmployeeDTO> entities = new List<EmployeeDTO>();
+    Dictionary<long, List<string>> roles = new Dictionary<long, List<string>>();
+    PaginationSearchDTO paginationDTO = new PaginationSearchDTO() { RecordsPerPage = 10 };
+    private int totalAmountOfPages;
+    private long totalAmount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userRoles = await _roleRepository.GetRolesForStore(storeId);
+        if (!userRoles.Contains(EmployeeRole.Admin))
+            _navigationManager.NavigateTo("NotFound");
+
+        await LoadEntities();
+    }
+
+    private async Task Search(ChangeEventArgs args)
+    {
+        paginationDTO.SearchText = args.Value.ToString();
+        await LoadEntities();
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        paginationDTO.Page = page;
+        await LoadEntities();
+    }
+
+    private async Task LoadEntities()
+    {
+        var paginatedResponse = await _entityRepository.GetStoreEmployeesByStore(paginationDTO, storeId);
+        entities = paginatedResponse.Response;
+        totalAmountOfPages = paginatedResponse.TotalAmountPages;
+        totalAmount = paginatedResponse.TotalAmount;
+    }
+
+    private async Task ShowModal(long id)
+    {
+        var modal = Modal.Show<ConfirmDelete>(@T["Modal_Confirm_Delete"]);
+        var result = await modal.Result;
+
+        if (!result.Cancelled && (result.Data is bool accepted) && accepted)
+        {
+            try
+            {
+                await _entityRepository.Delete(id);
+                await LoadEntities();
+                Toaster.Error(T["Message_Delete"]);
+            }
+            catch (Exception ex)
+            {
+                Toaster.Error(T["Message_Error"]);
+                await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+            }
+        }
+    }
+}

@@ -1,0 +1,344 @@
+﻿@inject ICategoryRepository _categoryRepository
+
+@attribute [Authorize(Roles = "Admin")]
+
+<div class="page-content-wrapper">
+    <div class="container">
+        <div class="profile-wrapper-area py-3">
+            <div class="card user-info-card">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="user-info">
+                        <h3>@Action @T["Class_Category"]</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="card user-data-card">
+                <div class="card-body">
+                    <EditForm Model="entity" OnValidSubmit="onTestSubmit">
+                        <DataAnnotationsValidator />
+                        @if (Action == T["Action_Create"])
+                        {
+                            #region Categories
+                            <div class="form-group">
+                                <label>@T["Property_CategoryLevel"]</label>
+                                <div>
+                                    <select class="form-control" @onchange="@onChangeCategoryLevel">
+                                        <option value="-1">
+                                            @T["Action_Select"]
+                                        </option>
+                                        @foreach (var item in Enum.GetValues(typeof(CategoryLevel)))
+                                        {
+                                            <option value="@item">@item</option>
+                                        }
+                                    </select>
+                                    <ValidationMessage For="@(() => entity.CategoryLevel)" />
+                                </div>
+                            </div>
+                            @if (entity.CategoryLevel == CategoryLevel.Category_L1 ||
+entity.CategoryLevel == CategoryLevel.Category_L2 ||
+entity.CategoryLevel == CategoryLevel.Category_L3 ||
+entity.CategoryLevel == CategoryLevel.Category_L4)
+                            {
+                                <div class="form-group">
+                                    <label>@T["Property_Category"]:</label>
+                                    <div>
+                                        <select class="form-control" @onchange="@onChangeCategory">
+                                            <option value="0">
+                                                @T["Action_Select"]
+                                            </option>
+                                            @foreach (var item in Categories)
+                                            {
+                                                <option value="@item.Id">
+                                                    @_localizationDB.GetName(item)
+                                                </option>
+                                            }
+                                        </select>
+                                        <ValidationMessage For="@(() => entity.ParentId)" />
+                                    </div>
+                                </div>
+                            }
+
+                            @if (entity.CategoryLevel == CategoryLevel.Category_L2 ||
+         entity.CategoryLevel == CategoryLevel.Category_L3 ||
+         entity.CategoryLevel == CategoryLevel.Category_L4)
+                            {
+                                <div class="form-group">
+                                    <label>@T["Property_CategoryL1"]:</label>
+                                    <div>
+                                        <select class="form-control" @onchange="@onChangeCategoryL1">
+                                            <option value="0">
+                                                @T["Action_Select"]
+                                            </option>
+                                            @foreach (var item in Categories_L1)
+                                            {
+                                                <option value="@item.Id">
+                                                    @_localizationDB.GetName(item)
+                                                </option>
+                                            }
+                                        </select>
+                                        <ValidationMessage For="@(() => entity.ParentId)" />
+                                    </div>
+                                </div>
+                            }
+
+                            @if (entity.CategoryLevel == CategoryLevel.Category_L3 ||
+         entity.CategoryLevel == CategoryLevel.Category_L4)
+                            {
+                                <div class="form-group">
+                                    <label>@T["Property_CategoryL2"]:</label>
+                                    <div>
+                                        <select class="form-control" @onchange="@onChangeCategoryL2">
+                                            <option value="0">
+                                                @T["Action_Select"]
+                                            </option>
+                                            @foreach (var item in Categories_L2)
+                                            {
+                                                <option value="@item.Id">
+                                                    @_localizationDB.GetName(item)
+                                                </option>
+                                            }
+                                        </select>
+                                        <ValidationMessage For="@(() => entity.ParentId)" />
+                                    </div>
+                                </div>
+                            }
+
+                            @if (entity.CategoryLevel == CategoryLevel.Category_L4)
+                            {
+                                <div class="form-group">
+                                    <label>@T["Property_CategoryL3"]:</label>
+                                    <div>
+                                        <select class="form-control" @onchange="@onChangeCategoryL3">
+                                            <option value="0">
+                                                @T["Action_Select"]
+                                            </option>
+                                            @foreach (var item in Categories_L3)
+                                            {
+                                                <option value="@item.Id">@item.Name_en</option>
+                                            }
+                                        </select>
+                                        <ValidationMessage For="@(() => entity.ParentId)" />
+                                    </div>
+                                </div>
+                            }
+                            #endregion
+                        }
+                        else if (Action == "Edit")
+                        {
+                            <div class="form-group">
+                                <label>@T["Property_CategoryLevel"]</label>
+                                <div>
+                                    <input type="text" class="form-control" value="@entity.CategoryLevel.ToString()" disabled />
+                                </div>
+                            </div>
+                            if (entity.Parent != null)
+                            {
+                                <div class="form-group">
+                                    <label>@T["Property_ParentCategory"]</label>
+                                    <div>
+                                        <input type="text" class="form-control" value="@_localizationDB.GetName(entity.Parent)" disabled />
+                                    </div>
+                                </div>
+                            }
+                        }
+                        <div class="form-group">
+                            <label>@T["Property_Name_en"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Name_en" />
+                                <ValidationMessage For="@(() => entity.Name_en)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Name_ar"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Name_ar" />
+                                <ValidationMessage For="@(() => entity.Name_ar)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Name_fr"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Name_fr" />
+                                <ValidationMessage For="@(() => entity.Name_fr)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Name_ru"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Name_tr" />
+                                <ValidationMessage For="@(() => entity.Name_tr)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Name_tr"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Name_ru" />
+                                <ValidationMessage For="@(() => entity.Name_ru)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Description_en"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Description_en" />
+                                <ValidationMessage For="@(() => entity.Description_en)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Description_ar"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Description_ar" />
+                                <ValidationMessage For="@(() => entity.Description_ar)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Description_fr"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Description_fr" />
+                                <ValidationMessage For="@(() => entity.Description_fr)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Description_ru"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Description_ru" />
+                                <ValidationMessage For="@(() => entity.Description_ru)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Description_tr"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Description_tr" />
+                                <ValidationMessage For="@(() => entity.Description_tr)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <InputImage Label="@T["Property_Image"]" OnSelectedImage="PictureSelected" ImageURL="@imageURL" />
+                        </div>
+                        <button class="btn btn-success" disabled=@isBusy type="submit">@T["Action_Save"]</button>
+                        <a class="btn btn-primary" href="categoriesAdmin">@T["Action_Back_To_List"]</a>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Category entity { get; set; }
+    [Parameter] public string Action { get; set; }
+    [Parameter] public EventCallback onValidSubmit { get; set; }
+    [Parameter] public bool isBusy { get; set; }
+
+    private string imageURL;
+
+    private bool valid;
+
+    List<Category> Categories = new List<Category>();
+    List<Category> Categories_L1 = new List<Category>();
+    List<Category> Categories_L2 = new List<Category>();
+    List<Category> Categories_L3 = new List<Category>();
+
+    private long category, category_L1, category_L2, category_L3;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(entity.Image))
+        {
+            imageURL = entity.Image;
+            entity.Image = null;
+        }
+
+        valid = (Action == T["Property_Image"]) ? false : true;
+        var query = await _categoryRepository.GetCategoriesWithoutProducts();
+        Categories = query.Where(s => s.CategoryLevel == CategoryLevel.Category).ToList();
+    }
+
+    private void onChangeCategoryLevel(ChangeEventArgs e)
+    {
+        var str = e.Value.ToString();
+        if (str != "-1")
+        {
+            entity.CategoryLevel = (CategoryLevel)Enum.Parse(typeof(CategoryLevel), e.Value.ToString());
+            valid = true;
+        }
+        else
+            valid = false;
+    }
+
+    private async Task onChangeCategory(ChangeEventArgs e)
+    {
+        var str = e.Value.ToString();
+        category = long.Parse(str);
+        if (entity.CategoryLevel != CategoryLevel.Category_L1)
+        {
+            valid = false;
+            var query = await _categoryRepository.GetCategoriesWithoutProducts();
+            query = query.Where(s => s.CategoryLevel == CategoryLevel.Category_L1).ToList();
+            Categories_L1 = query.Where(x => x.ParentId == category).ToList();
+        }
+        else
+        {
+            valid = true;
+            entity.ParentId = category;
+        }
+    }
+
+    private async Task onChangeCategoryL1(ChangeEventArgs e)
+    {
+        var str = e.Value.ToString();
+        category_L1 = long.Parse(str);
+        if (entity.CategoryLevel != CategoryLevel.Category_L2)
+        {
+            valid = false;
+            var query = await _categoryRepository.GetCategoriesWithoutProducts();
+            query = query.Where(s => s.CategoryLevel == CategoryLevel.Category_L1).ToList();
+            Categories_L2 = query.Where(x => x.ParentId == category_L1).ToList();
+        }
+        else
+        {
+            valid = true;
+            entity.ParentId = category_L1;
+        }
+    }
+
+    private async Task onChangeCategoryL2(ChangeEventArgs e)
+    {
+        var str = e.Value.ToString();
+        category_L2 = long.Parse(str);
+        if (entity.CategoryLevel != CategoryLevel.Category_L3)
+        {
+            valid = false;
+            var query = await _categoryRepository.GetCategoriesWithoutProducts();
+            query = query.Where(s => s.CategoryLevel == CategoryLevel.Category_L1).ToList();
+            Categories_L3 = query.Where(x => x.ParentId == category_L2).ToList();
+        }
+        else
+        {
+            valid = true;
+            entity.ParentId = category_L2;
+        }
+    }
+
+    private void onChangeCategoryL3(ChangeEventArgs e)
+    {
+        var str = e.Value.ToString();
+        category_L3 = long.Parse(str);
+        entity.ParentId = category_L3;
+        valid = true;
+    }
+
+    private void PictureSelected(string imageBase64)
+    {
+        entity.Image = imageBase64;
+        imageURL = null;
+    }
+
+    private async Task onTestSubmit()
+    {
+        isBusy = false;
+        if (valid == false)
+            Toaster.Error(@T["Message_Select_err"]);
+        else
+            await onValidSubmit.InvokeAsync();
+    }
+}

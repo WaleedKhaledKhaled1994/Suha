@@ -1,0 +1,93 @@
+﻿@inject IJSRuntime js
+
+<!-- Header Area-->
+<div class="header-area" id="headerArea">
+    <div class="container h-100 d-flex align-items-center justify-content-between">
+        <!-- Logo Wrapper-->
+        <div class="logo-wrapper"><a href="home.html"><img src="img/core-img/logo-small.png" alt=""></a></div>
+        <!-- Search Form-->
+        <div class="top-search-form">
+            <form action="#" method="POST">
+                <input class="form-control" type="search" placeholder="Enter your keyword">
+                <button type="submit"><i class="fa fa-search"></i></button>
+            </form>
+        </div>
+        <!-- Navbar Toggler-->
+        <div class="suha-navbar-toggler d-flex justify-content-between flex-wrap" id="suhaNavbarToggler" @onclick="NavbarToggler"><span></span><span></span><span></span></div>
+    </div>
+</div>
+<!-- Sidenav Black Overlay-->
+<div class="sidenav-black-overlay" @onclick="SidenavBlackOverlay"></div>
+<!-- Side Nav Wrapper-->
+<div class="suha-sidenav-wrapper" id="sidenavWrapper">
+    <AuthorizeView Roles="Admin">
+        <!-- Sidenav Profile-->
+        <div class="sidenav-profile">
+            <div class="user-profile"><img src="img/bg-img/9.jpg" alt=""></div>
+            <div class="user-info">
+                <h6 class="user-name mb-0">Suha Jannat</h6>
+                <p class="available-balance">Balance <span>$<span class="counter">379.23</span></span></p>
+            </div>
+        </div>
+        <!-- Sidenav Nav-->
+        <ul class="sidenav-nav">
+            <li><a href="profile"><i class="lni-user"></i>My Profile</a></li>
+            <li><a href="notifications.html"><i class="lni-alarm lni-tada-effect"></i>Notifications<span class="ml-3 badge badge-warning">3</span></a></li>
+            <li><a href="pages.html"><i class="lni-empty-file"></i>All Pages</a></li>
+            <li><a href="wishlist-grid.html"><i class="lni-heart-filled"></i>My Wishlist</a></li>
+            <li><a href="settings"><i class="lni-cog"></i>Settings</a></li>
+            <li><a href="logout"><i class="lni-power-switch"></i>Sign Out</a></li>
+        </ul>
+        <!-- Go Back Button-->
+        <div class="go-home-btn" id="goHomeBtn" @onclick="goHomeBtn"><i class="lni-arrow-left"></i></div>
+
+    </AuthorizeView>
+  
+    
+    <AuthorizeView Roles="Waleed">
+        <!-- Sidenav Profile-->
+        <div class="sidenav-profile">
+
+            <div class="user-info">
+                <h6 class="user-name mb-0 user-profile-name">Admin Suha Jannat</h6>
+
+            </div>
+        </div>
+        <!-- Sidenav Nav-->
+        <ul class="sidenav-nav">
+            <li><a href="profile"><i class="lni-user"></i>My Profile</a></li>
+            <li><a href="profile"><i class="lni-producthunt"></i>Products</a></li>
+            <li><a href="profile"><i class="lni-package"></i>Orders</a></li>
+
+            <li><a href="profile"><i class="lni-tag"></i>Subcategories</a></li>
+            <li><a href="profile"><i class="lni-tab"></i>Categories</a></li>
+
+            <li><a href="profile"><i class="lni-facebook-messenger lni-tada-effect"></i>Messages<span class="ml-3 badge badge-warning">15</span></a></li>
+
+            <li><a href="notifications.html"><i class="lni-alarm lni-tada-effect"></i>Notifications<span class="ml-3 badge badge-warning">3</span></a></li>
+            <li><a href="pages.html"><i class="lni-empty-file"></i>All Pages</a></li>
+
+            <li><a href="settings"><i class="lni-cog"></i>Settings</a></li>
+            <li><a href="logout"><i class="lni-power-switch"></i>Sign Out</a></li>
+        </ul>
+        <!-- Go Back Button-->
+        <div class="go-home-btn" id="goHomeBtn" @onclick="goHomeBtn"><i class="lni-arrow-left"></i></div>
+        
+    </AuthorizeView>
+
+
+</div>
+@code {
+    protected async Task NavbarToggler()
+    {
+        await js.InvokeVoidAsync("NavbarToggler");
+    }
+    protected async Task goHomeBtn()
+    {
+        await js.InvokeVoidAsync("goHomeBtn");
+    }
+    protected async Task SidenavBlackOverlay()
+    {
+        await js.InvokeVoidAsync("SidenavBlackOverlay");
+    }
+}

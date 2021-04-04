@@ -1,0 +1,294 @@
+﻿@inject ICityRepository _cityRepository
+@inject ICountryRepository _countryRepository
+@inject ICurrencyRepository _currencyRepository
+@inject IUserCRepository _userCRepository
+@inject IPaymentMethodRepository _paymentMethodRepository
+
+@attribute [Authorize(Roles = "User")]
+
+<div class="page-content-wrapper">
+    <div class="container">
+        <div class="profile-wrapper-area py-3">
+            <div class="card user-info-card">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="user-info">
+                        <h3>@Action @T["Class_Store"]</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="card user-data-card">
+                <div class="card-body">
+                    <EditForm Model="entity" OnSubmit="OnDataAnnotationsValidated">
+                        <DataAnnotationsValidator />
+                        <div class="form-group">
+                            <label>@T["Property_Name"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Name" />
+                                <ValidationMessage For="@(() => entity.Name)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Class_Country"]:</label>
+                            <Autocomplete Data="@Countries"
+                                          TextField="@((item)=>_localizationDB.GetName(item))"
+                                          ValueField="@((item)=>item.Id)"
+                                          SelectedValue="@selectedCountry"
+                                          SelectedValueChanged="@ChangeCountryHandler"
+                                          Placeholder="" />
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Class_City"]:</label>
+                            <Autocomplete Data="@Cities"
+                                          TextField="@((item)=>_localizationDB.GetName(item))"
+                                          ValueField="@((item)=>item.Id)"
+                                          SelectedValue="@entity.CityId"
+                                          SelectedValueChanged="@ChangeCityHandler"
+                                          Placeholder="" />
+                            <ValidationMessage For="@(() => entity.CityId)" />
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_Address"]:</label>
+                            <div>
+                                <InputText class="form-control" @bind-Value="@entity.Address" />
+                                <ValidationMessage For="@(() => entity.Address)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_StoreCurrency"]:</label>
+                            <div>
+                                <SelectList TItem="@Currency"
+                                            TValue="long"
+                                            Data="@Currencies"
+                                            TextField="@((item)=>_localizationDB.GetName(item))"
+                                            ValueField="@((item)=>item.Id)"
+                                            SelectedValue="@SelectedCurrencyValue"
+                                            SelectedValueChanged="@ChangeCurrencyHandler" />
+                                <ValidationMessage For="@(() => entity.CurrencyId)" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>@T["Property_StoreTags"]:</label>
+                            <div>
+                                <MultipleSelector Selected="SelectedT"
+                                                  NoSelected="NotSelectedT">
+                                </MultipleSelector>
+                            </div>
+                        </div>
+                        <TwoMultipleSelector NotSelectedCities="NotSelectedCities"
+                                             SelectedCities="SelectedCities"
+                                             NotSelectedCountries="NotSelectedCountries"
+                                             SelectedCountries="SelectedCountries" />
+                        @*@if (Action != @T["Action_Edit"])
+                        {
+                            <div class="form-group">
+                                <label>@T["Property_StoreUsers"]:</label>
+                                <div>
+                                    <MultipleSelectorTypeahead Context="UserC"
+                                                               SearchMethod="SearchMethod"
+                                                               SelectedElements="SelectedUsersC">
+                                        <MyResultTemplate>
+                                            @UserC.FirstName @UserC.LastName (@UserC.UserName)
+                                        </MyResultTemplate>
+                                        <MyListTemplate>
+                                            @UserC.UserName
+                                        </MyListTemplate>
+                                    </MultipleSelectorTypeahead>
+                                </div>
+                            </div>
+                        }*@
+                        <div class="form-group">
+                            <label>@T["NavMenu_PaymentMethods"]</label>
+                            <br />
+                            @foreach (var item in dicPaymentMethod)
+                            {
+                                <label>@item.Key.Name &nbsp;</label>
+                                <div>
+                                    @if (SelectedPaymentMethodsIds.Contains(item.Key.Id))
+                                    {
+                                        <input type="checkbox" checked="checked" @onchange="eventArgs => { changePaymentMethodCheckbox(eventArgs.Value, item.Key); }" />
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" @onchange="eventArgs => { changePaymentMethodCheckbox(eventArgs.Value, item.Key); }" />
+                                    }
+                                </div>
+                                @if (SelectedPaymentMethodsIds.Contains(item.Key.Id))
+                                {
+                                    <input type="text" class="form-control" value="@item.Value" @onchange="(ChangeEventArgs _event) => changePaymentMethodDetails(_event, item.Key)" placeholder="@T["PlaceHolder_Payment_Details"]" />
+                                }
+                            }
+                        </div>
+                        <div class="form-group">
+                            <InputImage Label="@T["Property_Image"]" OnSelectedImage="PictureSelected" ImageURL="@imageURL" />
+                        </div>
+                        <button class="btn btn-success" disabled="@isBusy" type="submit">@T["Action_Save"]</button>
+                        <a class="btn btn-primary" href="stores">@T["Action_Back_To_List"]</a>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Store entity { get; set; }
+    [Parameter] public string Action { get; set; }
+    [Parameter] public EventCallback onValidSubmit { get; set; }
+    [Parameter] public bool isBusy { get; set; }
+
+    [Parameter] public long SelectedCurrencyValue { get; set; }
+    [Parameter] public List<UserC> SelectedUsersC { get; set; } = new List<UserC>();
+
+    [Parameter] public List<Tag> SelectedTags { get; set; } = new List<Tag>();
+    [Parameter] public List<Tag> NotSelectedTags { get; set; } = new List<Tag>();
+
+    [Parameter] public List<Country> SelectedCountries { get; set; } = new List<Country>();
+    [Parameter] public List<Country> NotSelectedCountries { get; set; } = new List<Country>();
+
+    [Parameter] public List<City> SelectedCities { get; set; } = new List<City>();
+    [Parameter] public List<City> NotSelectedCities { get; set; } = new List<City>();
+
+    [Parameter] public List<StorePaymentMethods> SelectedPaymentMethods { get; set; } = new List<StorePaymentMethods>();
+
+    private string imageURL;
+
+    private long? selectedCountry;
+
+    private List<Currency> Currencies = new List<Currency>();
+    private List<Country> Countries = new List<Country>();
+    private List<City> AllCities = new List<City>();
+    private List<City> Cities = new List<City>();
+    private List<PaymentMethod> PaymentMethods = new List<PaymentMethod>();
+
+    private List<MultipleSelectorModel> SelectedT = new List<MultipleSelectorModel>();
+    private List<MultipleSelectorModel> NotSelectedT = new List<MultipleSelectorModel>();
+
+    private Dictionary<PaymentMethod, string> dicPaymentMethod = new Dictionary<PaymentMethod, string>();
+    private List<long> SelectedPaymentMethodsIds { get; set; } = new List<long>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        selectedCountry = Action == "Edit" ? entity.City?.Country?.Id : 0;
+        Currencies = await _currencyRepository.Get();
+        Countries = await _countryRepository.Get();
+        AllCities = await _cityRepository.Get();
+        Cities = AllCities;
+        PaymentMethods = await _paymentMethodRepository.Get();
+
+        if (!string.IsNullOrEmpty(entity.Image))
+        {
+            imageURL = entity.Image;
+            entity.Image = null;
+        }
+
+        SelectedT = SelectedTags.Select(x => new MultipleSelectorModel(x.Id.ToString(), _localizationDB.GetName(x))).ToList();
+        NotSelectedT = NotSelectedTags.Select(x => new MultipleSelectorModel(x.Id.ToString(), _localizationDB.GetName(x))).ToList();
+
+        await LoadPaymentMethod();
+    }
+
+    private Task LoadPaymentMethod()
+    {
+        foreach (var item in SelectedPaymentMethods)
+            SelectedPaymentMethodsIds.Add(item.PaymentMethodId);
+
+        foreach (var item in PaymentMethods)
+        {
+            if (SelectedPaymentMethodsIds.Contains(item.Id))
+                dicPaymentMethod.Add(item, SelectedPaymentMethods.Where(x => x.PaymentMethodId == item.Id).FirstOrDefault().Details);
+            else
+                dicPaymentMethod.Add(item, "");
+        }
+        return Task.CompletedTask;
+    }
+
+    private void PictureSelected(string imageBase64)
+    {
+        entity.Image = imageBase64;
+        imageURL = null;
+    }
+
+    private void ChangeCountryHandler(object newValue)
+    {
+        if (newValue == null)
+            Cities = AllCities;
+        else
+        {
+            selectedCountry = (long)newValue;
+            Cities = Cities.Where(x => x.CountryId == (long)newValue).ToList();
+        }
+    }
+
+    private void ChangeCityHandler(object newValue)
+    {
+        entity.CityId = (long)newValue;
+    }
+
+    private void ChangeCurrencyHandler(long newValue)
+    {
+        SelectedCurrencyValue = newValue;
+        StateHasChanged();
+    }
+
+    private async Task<IEnumerable<UserC>> SearchMethod(string searchText)
+    {
+        var result = await _userCRepository.GetUserCBySearch(searchText);
+        var resultID = result.Select(x => x.Id).ToList();
+        List<long> selectedId = SelectedUsersC.Select(x => x.Id).ToList();
+        foreach (var item in resultID)
+        {
+            if (selectedId.Contains(item))
+            {
+                var user = result.Where(x => x.Id == item).SingleOrDefault();
+                result.Remove(user);
+            }
+        }
+        return result.AsEnumerable();
+    }
+
+    private async Task OnDataAnnotationsValidated()
+    {
+        if (SelectedPaymentMethodsIds.Any())
+        {
+            entity.CurrencyId = SelectedCurrencyValue;
+
+            entity.StoreTags = SelectedT
+            .Select(x => new StoreTags { TagId = long.Parse(x.Key) }).ToList();
+
+            entity.StoreCountries = SelectedCountries
+            .Select(x => new StoreCountries { CountryId = x.Id }).ToList();
+
+            entity.StoreCities = SelectedCities
+            .Select(x => new StoreCities { CityId = x.Id }).ToList();
+
+            entity.StoreUsers = SelectedUsersC
+            .Select(x => new StoreUsers { UserCId = x.Id }).ToList();
+
+            foreach (var item in dicPaymentMethod)
+                if (!SelectedPaymentMethodsIds.Contains(item.Key.Id))
+                    dicPaymentMethod.Remove(item.Key);
+
+            entity.StorePaymentMethods = dicPaymentMethod
+                .Select(x => new StorePaymentMethods { PaymentMethodId = x.Key.Id, Details = x.Value }).ToList();
+
+            await onValidSubmit.InvokeAsync(null);
+        }
+        else
+        {
+            Toaster.Error(T["Please Select one Payment Method at least"]);
+        }
+    }
+
+    private void changePaymentMethodCheckbox(object args, PaymentMethod paymentMethod)
+    {
+        if (args.ToString() == "True")
+            SelectedPaymentMethodsIds.Add(paymentMethod.Id);
+
+        else if (args.ToString() == "False")
+            SelectedPaymentMethodsIds.Remove(paymentMethod.Id);
+    }
+    private void changePaymentMethodDetails(ChangeEventArgs args, PaymentMethod paymentMethod)
+    {
+        dicPaymentMethod[paymentMethod] = args.Value.ToString();
+    }
+}

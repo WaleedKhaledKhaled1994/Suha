@@ -1,0 +1,32 @@
+﻿@page "/logout"
+
+@inject ILoginService loginService
+
+@using AD.Client.Auth
+
+<img src="/images/Loading.gif" alt="Loading..." style="display: block; margin-left: auto; margin-right: auto; width: 50%;" />
+
+@code{
+    private int? max;
+    Dictionary<int, ProductCartDTO> dic = new Dictionary<int, ProductCartDTO>();
+
+    protected async override Task OnInitializedAsync()
+    {
+        await ClearCart();
+        await loginService.Logout();
+        _navigationManager.NavigateTo("");
+    }
+
+    private async Task ClearCart()
+    {
+        max = await _localStorage.GetItemAsync<int>("max");
+
+        for (int j = 0; j <= max; j++)
+        {
+            var productCartDTO = await _localStorage.GetItemAsync<ProductCartDTO>($"{j}");
+            if (productCartDTO != null)
+                await _localStorage.RemoveItemAsync($"{j}");
+        }
+        await _localStorage.SetItemAsync("max", 0);
+    }
+}

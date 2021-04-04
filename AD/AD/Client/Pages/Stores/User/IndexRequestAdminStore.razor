@@ -1,0 +1,154 @@
+@page "/RequestAdminStores"
+
+@using AD.Shared.DTOs.Store
+
+@inject IStoreRepository _entityRepository
+
+@inject IStoreUserRepository _storeUserRepository
+
+@attribute [Authorize(Roles = "User")]
+
+<h3 style="text-align: center;">@T["NavMenu_RequestAdminStores"]</h3>
+
+<div class="form-inline">
+    <div class="form-group">
+        @*<a class="btn btn-info" href="store/create">@T["Action_Create"] @T["Class_Store"]</a>
+            &nbsp;&nbsp;&nbsp;*@
+        <div class="form-group mb-2"><input @onchange="Search" class="form-control" placeholder="@T["Action_Search"]" /></div>
+        <span class="text-muted ml-5">
+            @T["Action_Search_Shwoing"] @entities.Count @T["Action_Search_OutOf"] @totalAmount
+        </span>
+    </div>
+</div>
+<GenericList List="entities">
+    <WholeListTemplate>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>@T["Property_Name"]</th>
+                    <th>@T["Property_Image"]</th>
+                    <th>@T["Property_Permissions"]</th>
+                    <th>@T["Property_Status"]</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in entities)
+                {
+                    <tr>
+                        <td>
+                            @item.Store.Name
+                        </td>
+                        <td>
+                            <img class="img-fluid img-thumbnail" alt="Store Image" src="@item.Store.Image" style="height:100px; width:100px;" />
+                        </td>
+                        <td>
+                            @if (item.Admin == true)
+                            {
+                                <p>@T["Permission_Admin"]</p>
+                            }
+                            else
+                            {
+                                if (item.ManageComments == true)
+                                {
+                                    <p>@T["Permission_ManageComments"]</p>
+                                }
+                                if (item.ManageOrders == true)
+                                {
+                                    <p>@T["Permission_ManageOrders"]</p>
+                                }
+                                if (item.ManageProducts == true)
+                                {
+                                    <p>@T["Permission_ManageProducts"]</p>
+                                }
+                            }
+                        </td>
+                        <td>
+                            @if (item.Status != StoreUserStatus.Pending)
+                            {
+                                @item.Status
+                            }
+                            else
+                            {
+                                <button class="btn btn-success" @onclick="@(() => ShowModal(@item.Store.Id, StoreUserStatus.Accepted))">@T["Action_Accept"]</button>
+                                <button class="btn btn-danger" @onclick="@(() => ShowModal(@item.Store.Id,StoreUserStatus.Rejected))">@T["Action_Reject"]</button>
+                            }
+                        </td>
+                        <td>
+                            <a class="btn btn-info" href="/store/details/@item.Store.Id">@T["Action_Details"]</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </WholeListTemplate>
+</GenericList>
+<AD.Client.Shared.Pagination CurrentPage="@paginationDTO.Page" SelectedPage="SelectedPage" TotalAmountPages="totalAmountOfPages"></AD.Client.Shared.Pagination>
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+
+    List<IndexRequestAdminStores> entities = new List<IndexRequestAdminStores>();
+
+    PaginationSearchDTO paginationDTO = new PaginationSearchDTO() { RecordsPerPage = 5 };
+    private int totalAmountOfPages;
+    private long totalAmount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEntities();
+    }
+
+    private async Task Search(ChangeEventArgs args)
+    {
+        paginationDTO.SearchText = args.Value.ToString();
+        await LoadEntities();
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        paginationDTO.Page = page;
+        await LoadEntities();
+    }
+
+    private async Task LoadEntities()
+    {
+        var paginatedResponse = await _entityRepository.GetRequestAdmin(paginationDTO);
+        entities = paginatedResponse.Response;
+        totalAmountOfPages = paginatedResponse.TotalAmountPages;
+        totalAmount = paginatedResponse.TotalAmount;
+    }
+
+    private async Task ShowModal(long id, StoreUserStatus status)
+    {
+        IModalReference modal;
+        if (status == StoreUserStatus.Rejected)
+        {
+            modal = Modal.Show<ConfirmDelete>(@T["Modal_Confirm_Reject"]);
+        }
+        else
+        {
+            modal = Modal.Show<Confirm>(@T["Modal_Confirm_Accept"]);
+        }
+        var result = await modal.Result;
+
+        if (!result.Cancelled && (result.Data is bool accepted) && accepted)
+        {
+            try
+            {
+                StoreUsers entityNew = await _storeUserRepository.GetStoreUserByStore(id);
+
+                entityNew.Status = status;
+                await _storeUserRepository.Accept_Reject(entityNew);
+                await LoadEntities();
+                Toaster.Success(T["Message_Update"]);
+            }
+            catch (Exception ex)
+            {
+                Toaster.Error(T["Message_Error"]);
+                await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+            }
+        }
+    }
+}
+

@@ -1,0 +1,181 @@
+﻿@page "/product/details/{entityId:long}"
+
+@inject IProductRepository _entityRepository
+
+@if (entity != null)
+{
+    <div class="page-content-wrapper">
+        <div class="container">
+            <div class="profile-wrapper-area py-3">
+                <div class="card user-info-card">
+                    <div class="card-body p-4 d-flex align-items-center">
+                        <div class="user-info">
+                            <h3>@T["Action_Details"]</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card user-data-card">
+                    <div class="card-body">
+                        @if (roles.Contains(EmployeeRole.ManageProducts))
+                        {
+                            <div class="form-group">
+                                <label class="font-weight-bolder">@T["Property_CodeStore"]:</label>
+                                <div>
+                                    <span>@entity.ProductDetailsDTO.Product.CodeStore</span>
+                                </div>
+                            </div>
+                        }
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Category"]:</label>
+                            <div>
+                                @foreach (var item in entity.ProductDetailsDTO.UpperCategories)
+                                {
+                                    <span>
+                                        @_localizationDB.GetName(item),
+                                    </span>
+                                }
+                                <span>
+                                    @_localizationDB.GetName(entity.ProductDetailsDTO.Product.Category)
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Name"]:</label>
+                            <div>
+                                <span>@entity.ProductDetailsDTO.Product.Name</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Description"]:</label>
+                            <div>
+                                <span>@entity.ProductDetailsDTO.Product.Description</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_MinValue"]:</label>
+                            <div>
+                                <span>@entity.ProductDetailsDTO.Product.MinValue</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Colors"]:</label>
+                            <div>
+                                @foreach (var item in entity.ProductDetailsDTO.Colors)
+                                {
+                                    <div style="width:100px;height:50px;background-color:@item">@item</div>
+                                }
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Price"]:</label>
+                            <div>
+                                <span>@entity.ProductDetailsDTO.Product.Price @entity.ProductDetailsDTO.Product.Currency?.Code</span>
+                                <span>(@entity.PriceUser @entity.UserCurrency?.Code)</span>
+                            </div>
+                        </div>
+                        @if (@entity.ProductDetailsDTO.Product.Quantity1 != null)
+                        {
+                            <div class="form-group">
+                                <label class="font-weight-bolder">@T["Property_Quantity1"]: @T["Property_Price1"]:</label>
+                                <div>
+                                    <span style="font-weight:400">(@entity.ProductDetailsDTO.Product.Quantity1 @_localizationDB.GetName(@entity.ProductDetailsDTO.Product.MeasruingUnit)):</span>
+                                    <span> @entity.ProductDetailsDTO.Product.Price1 @entity.ProductDetailsDTO.Product.Currency?.Code</span>
+                                    <span>(@entity.PriceUser1 @entity.UserCurrency?.Code)</span>
+                                </div>
+                            </div>
+                        }
+                        @if (@entity.ProductDetailsDTO.Product.Quantity2 != null)
+                        {
+                            <div class="form-group">
+                                <label class="font-weight-bolder">@T["Property_Quantity2"]: @T["Property_Price2"]:</label>
+                                <div>
+                                    <span style="font-weight:400">(@entity.ProductDetailsDTO.Product.Quantity2 @_localizationDB.GetName(@entity.ProductDetailsDTO.Product.MeasruingUnit)):</span>
+                                    <span> @entity.ProductDetailsDTO.Product.Price2 @entity.ProductDetailsDTO.Product.Currency?.Code</span>
+                                    <span>(@entity.PriceUser2 @entity.UserCurrency?.Code)</span>
+                                </div>
+                            </div>}
+                        @if (@entity.ProductDetailsDTO.Product.Quantity3 != null)
+                        {
+                            <div class="form-group">
+                                <label class="font-weight-bolder">@T["Property_Quantity3"]: @T["Property_Price3"]:</label>
+                                <div>
+                                    <span style="font-weight:400">(@entity.ProductDetailsDTO.Product.Quantity3 @_localizationDB.GetName(@entity.ProductDetailsDTO.Product.MeasruingUnit)):</span>
+                                    <span> @entity.ProductDetailsDTO.Product.Price3 @entity.ProductDetailsDTO.Product.Currency?.Code</span>
+                                    <span>(@entity.PriceUser3 @entity.UserCurrency?.Code)</span>
+                                </div>
+                            </div>
+                        }
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Note"]:</label>
+                            <div>
+                                <span>@entity.ProductDetailsDTO.Product.Note</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bolder">@T["Property_Images"]:</label>
+                            <div>
+                                @foreach (var item in entity.ProductDetailsDTO.Images)
+                                {
+                                    <img class="img-fluid img-thumbnail" alt="Product Image" src="@item" style="height:200px; width:200px;" />
+                                }
+                            </div>
+                        </div>
+                        @if (roles.Contains(EmployeeRole.ManageProducts))
+                        {
+                            <a class="btn btn-primary" href="storeProducts/@entity.ProductDetailsDTO.Product.StoreId">@T["Action_Back_To_List"]</a>
+                            <a class="btn btn-success" href="product/edit/@entityId">@T["Action_Edit"]</a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-primary" href="products">@T["Action_Back_To_List"]</a>
+                        }
+                        @if (!roles.Any())
+                        {
+                            <button class="btn btn-success" @onclick="@(() => AddToCart(entity.ProductDetailsDTO.Product))">@T["Action_AddToCart"]</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [CascadingParameter] public IModalService Modal { get; set; }
+    public ProductDetailsUserDTO entity;
+    [Parameter] public long entityId { get; set; }
+    List<EmployeeRole> roles = new();
+
+    protected async override Task OnInitializedAsync()
+    {
+        entity = await _entityRepository.GetProductForUser(entityId);
+        if (entity == null)
+        {
+            _navigationManager.NavigateTo("NotFound");
+            return;
+        }
+        roles = await _roleRepository.GetRolesForStore(entityId);
+    }
+    private async Task AddToCart(Product product)
+    {
+        var parameters = new ModalParameters();
+        ProductDetailsUserDTO productVM = await _entityRepository.GetProductForUser(product.Id);
+        parameters.Add(nameof(ModalAddProduct.entity), productVM);
+        var options = new ModalOptions { ContentScrollable = true };
+        var modal = Modal.Show<ModalAddProduct>("Add Product To Cart", parameters, options);
+        var result = await modal.Result;
+
+        if (!result.Cancelled)
+        {
+            try
+            {
+                Toaster.Success("Added Successfully");
+            }
+            catch (Exception ex)
+            {
+                Toaster.Error(T["Message_Error"]);
+                await _homeRepository.LogToDB(new LogDTO() { Page = _navigationManager.Uri, Message = ex.Message, StackTrace = ex.StackTrace, InnerException = ex.InnerException?.ToString() });
+            }
+        }
+    }
+}

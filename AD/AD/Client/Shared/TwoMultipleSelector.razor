@@ -1,0 +1,191 @@
+﻿@inject ICityRepository _cityRepository
+@inject ICountryRepository _countryRepository
+
+<div class="form-group">
+    <label>@T["Property_StoreCountries"]:</label>
+    <div>
+        <div class="multiple-selector">
+            <ul class="selectable-ul">
+                @foreach (var item in NotSelectedCountries)
+                {
+                    <li @onclick="@(() => Select1(item))">
+                        @_localizationDB.GetName(item)
+                        @*@item.Name_en*@
+                        @*<LocalizationDB Entity="item" Property="Name" />*@
+                    </li>
+                }
+            </ul>
+            <div class="multiple-selector-buttons">
+                <button type="button" class="btn btn-success" @onclick="SelectAll1">>></button>
+                <button type="button" class="btn btn-danger" @onclick="DeselectAll1">@removeAllText</button>
+            </div>
+            <ul class="selectable-ul">
+                @foreach (var item in SelectedCountries)
+                {
+                    <li @onclick="@(() => Deselect1(item))">
+                        @_localizationDB.GetName(item)
+                        @*@item.Name_en*@
+                        @*<LocalizationDB Entity="item" Property="Name" />*@
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <label>@T["Property_StoreCities"]:</label>
+    <div>
+        <div class="multiple-selector">
+            <ul class="selectable-ul">
+                @foreach (var item in NotSelectedCities)
+                {
+                    <li @onclick="@(() => Select2(item))">
+                        @_localizationDB.GetName(item)
+                        @*@item.Name_en*@
+                        @*<LocalizationDB Entity="item" Property="Name" />*@
+                    </li>
+                }
+            </ul>
+            <div class="multiple-selector-buttons">
+                <button type="button" class="btn btn-success" @onclick="SelectAll2">>></button>
+                <button type="button" class="btn btn-danger" @onclick="DeselectAll2">@removeAllText</button>
+            </div>
+            <ul class="selectable-ul">
+                @foreach (var item in SelectedCities)
+                {
+                    <li @onclick="@(() => Deselect2(item))">
+                        @_localizationDB.GetName(item)
+                        @*@item.Name_en*@
+                        @*<LocalizationDB Entity="item" Property="Name" />*@
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string removeAllText = "<<";
+    [Parameter]
+    public List<Country> NotSelectedCountries { get; set; } = new List<Country>();
+    [Parameter]
+    public List<Country> SelectedCountries { get; set; } = new List<Country>();
+
+    [Parameter]
+    public List<City> NotSelectedCities { get; set; } = new List<City>();
+    [Parameter]
+    public List<City> SelectedCities { get; set; } = new List<City>();
+
+    private List<Country> AllCountries = new List<Country>();
+    private List<City> AllCities = new List<City>();
+
+    private List<City> CountryCities = new List<City>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllCountries = await _countryRepository.Get();
+        AllCities = await _cityRepository.Get();
+    }
+
+    private void Select1(Country item)
+    {
+        NotSelectedCountries.Remove(item);
+        SelectedCountries.Add(item);
+
+        CountryCities = AllCities.Where(x => x.CountryId == item.Id).ToList();
+
+        foreach (var city in CountryCities)
+            if (!SelectedCities.Any(x => x.Id == city.Id))
+                SelectedCities.Add(city);
+
+        foreach (var city in CountryCities)
+            if (NotSelectedCities.Any(x => x.Id == city.Id))
+            {
+                var c = NotSelectedCities.Where(x => x.Id == city.Id).SingleOrDefault();
+                NotSelectedCities.Remove(c);
+            }
+    }
+    private void Deselect1(Country item)
+    {
+        SelectedCountries.Remove(item);
+        NotSelectedCountries.Add(item);
+
+        CountryCities = AllCities.Where(x => x.CountryId == item.Id).ToList();
+        //NotSelectedCities.AddRange(CountryCities);
+
+        foreach (var city in CountryCities)
+            if (!NotSelectedCities.Any(x => x.Id == city.Id))
+            {
+                var c = CountryCities.Where(x => x.Id == city.Id).SingleOrDefault();
+                NotSelectedCities.Add(c);
+            }
+
+        while (true)
+        {
+            if (SelectedCities.Any(x => x.CountryId == item.Id))
+            {
+                var city = SelectedCities.Where(x => x.CountryId == item.Id).FirstOrDefault();
+                SelectedCities.Remove(city);
+            }
+            else
+                break;
+        }
+    }
+    private void SelectAll1()
+    {
+        SelectedCountries.AddRange(NotSelectedCountries);
+        NotSelectedCountries.Clear();
+
+        SelectedCities.AddRange(NotSelectedCities);
+        NotSelectedCities.Clear();
+    }
+    private void DeselectAll1()
+    {
+        NotSelectedCountries.AddRange(SelectedCountries);
+        SelectedCountries.Clear();
+
+        NotSelectedCities.AddRange(SelectedCities);
+        SelectedCities.Clear();
+    }
+
+    private void Select2(City item)
+    {
+        NotSelectedCities.Remove(item);
+        SelectedCities.Add(item);
+
+        if (NotSelectedCountries.Any(x => x.Id == item.CountryId))
+        {
+            var country = NotSelectedCountries.Where(x => x.Id == item.CountryId).SingleOrDefault();
+            SelectedCountries.Add(country);
+            NotSelectedCountries.Remove(country);
+        }
+    }
+    private void Deselect2(City item)
+    {
+        SelectedCities.Remove(item);
+        NotSelectedCities.Add(item);
+
+        if (SelectedCountries.Any(x => x.Id == item.CountryId) && !SelectedCities.Any(x => x.CountryId == item.CountryId))
+        {
+            var country = SelectedCountries.Where(x => x.Id == item.CountryId).SingleOrDefault();
+            SelectedCountries.Remove(country);
+            NotSelectedCountries.Add(country);
+        }
+    }
+    private void SelectAll2()
+    {
+        SelectedCities.AddRange(NotSelectedCities);
+        NotSelectedCities.Clear();
+
+        SelectedCountries.AddRange(NotSelectedCountries);
+        NotSelectedCountries.Clear();
+    }
+    private void DeselectAll2()
+    {
+        NotSelectedCities.AddRange(SelectedCities);
+        SelectedCities.Clear();
+
+        NotSelectedCountries.AddRange(SelectedCountries);
+        SelectedCountries.Clear();
+    }
+}

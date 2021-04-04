@@ -1,0 +1,57 @@
+﻿@inject IJSRuntime js
+
+    <!-- Header Area-->
+<div class="header-area" id="headerArea">
+    <div class="container h-100 d-flex align-items-center justify-content-between">
+        <!-- Back Button-->
+        <div class="back-button"><a href="@link"><i class="lni-arrow-left"></i></a></div>
+        <!-- Page Title-->
+        <div class="page-heading">
+            <h6 class="mb-0">@Title</h6>
+        </div>
+        <!-- Navbar Toggler-->
+        <div class="suha-navbar-toggler d-flex justify-content-between flex-wrap"  @onclick="NavbarToggler" id="suhaNavbarToggler"><span></span><span></span><span></span></div>
+    </div>
+</div>
+<!-- Sidenav Black Overlay-->
+<div class="sidenav-black-overlay"  @onclick="SidenavBlackOverlay" ></div>
+<!-- Side Nav Wrapper-->
+<div class="suha-sidenav-wrapper" id="sidenavWrapper">
+    <!-- Sidenav Profile-->
+    <div class="sidenav-profile">
+        <div class="user-profile"><img src="img/bg-img/9.jpg" alt=""></div>
+        <div class="user-info">
+            <h6 class="user-name mb-0">Suha Jannat</h6>
+            <p class="available-balance">Balance <span>$<span class="counter">379.23</span></span></p>
+        </div>
+    </div>
+    <!-- Sidenav Nav-->
+    <ul class="sidenav-nav">
+        <li><a href="profile.html"><i class="lni-user"></i>My Profile</a></li>
+        <li><a href="notifications.html"><i class="lni-alarm lni-tada-effect"></i>Notifications<span class="ml-3 badge badge-warning">3</span></a></li>
+        <li><a href="pages.html"><i class="lni-empty-file"></i>All Pages</a></li>
+        <li><a href="wishlist-grid.html"><i class="lni-heart-filled"></i>My Wishlist</a></li>
+        <li><a href="settings.html"><i class="lni-cog"></i>Settings</a></li>
+        <li><a href="intro.html"><i class="lni-power-switch"></i>Sign Out</a></li>
+    </ul>
+    <!-- Go Back Button-->
+    <div class="go-home-btn" @onclick="goHomeBtn" id="goHomeBtn"><i class="lni-arrow-left"></i></div>
+</div>
+@code{
+    [Parameter] public string Title { get; set; }
+
+    [Parameter] public string link { get; set; }
+
+    protected async Task NavbarToggler()
+    {
+        await js.InvokeVoidAsync("NavbarToggler");
+    }
+    protected async Task goHomeBtn()
+    {
+        await js.InvokeVoidAsync("goHomeBtn");
+    }
+    protected async Task SidenavBlackOverlay()
+    {
+        await js.InvokeVoidAsync("SidenavBlackOverlay");
+    }
+}
